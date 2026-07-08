@@ -1,5 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
+import os
 
 TABLE_SCHEMAS = {
     'blacklist': """
@@ -45,35 +46,7 @@ TABLE_SCHEMAS = {
             channel_id VARCHAR(255)
         )
     """,
-    'user_favorites': """
-        CREATE TABLE IF NOT EXISTS user_favorites (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(255),
-            amv_id VARCHAR(255),
-            source VARCHAR(255)
-        )
-    """,
-    'user_profiles': """
-        CREATE TABLE IF NOT EXISTS user_profiles (
-            user_id VARCHAR(255) PRIMARY KEY,
-            username VARCHAR(255),
-            avatar_url VARCHAR(255),
-            editing_software VARCHAR(255),
-            editing_style VARCHAR(255),
-            amvs TEXT,
-            youtube_link VARCHAR(255),
-            tiktok_link VARCHAR(255),
-            instagram_link VARCHAR(255)
-        )
-    """,
-    'user_ratings': """
-        CREATE TABLE IF NOT EXISTS user_ratings (
-            user_id VARCHAR(255),
-            rater_id VARCHAR(255),
-            rating FLOAT,
-            PRIMARY KEY (user_id, rater_id)
-        )
-    """,
+
     'instagramdl': """
         CREATE TABLE IF NOT EXISTS instagramdl (
             server_id VARCHAR(255) PRIMARY KEY,
@@ -117,13 +90,12 @@ TABLE_SCHEMAS = {
 }
 
 def create_db_connection():
-    """Create and return a database connection"""
     try:
         connection = mysql.connector.connect(
-            host='censored',
-            user='censored', 
-            password='censored',
-            database='censored'
+            host=os.getenv('DB_HOST', 'localhost'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD', ''),
+            database=os.getenv('DB_NAME', 'ryujin')
         )
         return connection if connection.is_connected() else None
     except Error as e:

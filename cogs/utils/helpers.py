@@ -3,15 +3,15 @@ import random
 import asyncio
 import nextcord
 
+from cogs.utils.constants import SYSTEM_CONFIG
+
 def count_files(folder):
-    """Count all files in a folder recursively"""
     count = 0
     for root, _, files in os.walk(folder):
         count += len(files)
     return count
 
 def generate_hashtags(character, anime):
-    """Generate hashtags for anime/character"""
     base_tags = [
         "anime", "amv", "edit", "animeedit",
         f"{anime.replace(' ', '').lower()}",
@@ -50,58 +50,114 @@ def generate_hashtags(character, anime):
         "animefilms", "animecommunity", "animeillustration", "animeposter",
         "animeposterart", "animedrawing", "animepaintings", "animeartist",
         "animeedits", "animegraphics", "animegif", "animefanedit",
-        "animegifedit", "animefanedit", "animegif", "amvedit", "amvcommunity", "amvartist", "amvedits", "amvediting", "amvworld", "amvfans", 
-        "amvlife", "amv4life", "amvforever", "amvscene", "amvclip", "amvs", "amvlove", "amvanime", 
-        "amvmaker", "amvcreations", "amveditor", "amvproduction", "amvstudio", "amvcreator", "amvteam", 
-        "amvstyle", "amvanimation", "amvmusic", "amvproject", "amvclips", "amvvideo", "amvfan", 
-        "amvchannel", "amvshots", "amvaddict", "amvpassion", "amvobsession", "amvguru", "amvstagram", 
+        "animegifedit", "animefanedit", "animegif", "amvedit", "amvcommunity", "amvartist", "amvedits", "amvediting", "amvworld", "amvfans",
+        "amvlife", "amv4life", "amvforever", "amvscene", "amvclip", "amvs", "amvlove", "amvanime",
+        "amvmaker", "amvcreations", "amveditor", "amvproduction", "amvstudio", "amvcreator", "amvteam",
+        "amvstyle", "amvanimation", "amvmusic", "amvproject", "amvclips", "amvvideo", "amvfan",
+        "amvchannel", "amvshots", "amvaddict", "amvpassion", "amvobsession", "amvguru", "amvstagram",
         "amvinstagram", "amvtiktok", "amvtube", "amvcreation", "amvking", "amvqueen", "amvlegend"
     ]
-    
+
     random_additional = random.sample(additional_tags, min(30, len(additional_tags)))
     all_tags = base_tags + random_additional
     return ["#" + tag for tag in all_tags if tag]
 
 async def handle_pagination(message, pages, bot):
-    """Handle pagination for embeds"""
     current_page = 0
-    
     while True:
         try:
             await message.clear_reactions()
-            await message.add_reaction("◀️")
-            await message.add_reaction("▶️")
+            await message.add_reaction("\u25c0\ufe0f")
+            await message.add_reaction("\u25b6\ufe0f")
 
             def check(reaction, user):
-                return not user.bot and str(reaction.emoji) in ["◀️", "▶️"] and reaction.message.id == message.id
+                return not user.bot and str(reaction.emoji) in ["\u25c0\ufe0f", "\u25b6\ufe0f"] and reaction.message.id == message.id
 
             try:
                 reaction, user = await bot.wait_for('reaction_add', timeout=300.0, check=check)
-                
-                if str(reaction.emoji) == "▶️" and current_page < len(pages) - 1:
+                if str(reaction.emoji) == "\u25b6\ufe0f" and current_page < len(pages) - 1:
                     current_page += 1
                     await message.edit(embed=pages[current_page])
-                elif str(reaction.emoji) == "◀️" and current_page > 0:
+                elif str(reaction.emoji) == "\u25c0\ufe0f" and current_page > 0:
                     current_page -= 1
                     await message.edit(embed=pages[current_page])
-
                 await message.remove_reaction(reaction, user)
             except asyncio.TimeoutError:
                 await message.clear_reactions()
                 break
-
         except Exception as e:
             print(f"Error handling reactions: {e}")
             await asyncio.sleep(5)
 
+def split_long_text(text, max_length=1900):
+    if len(text) <= max_length:
+        return [text]
+    chunks = []
+    current_chunk = ""
+    sentences = text.split('. ')
+    for sentence in sentences:
+        sentence_with_period = sentence + '. '
+        if len(current_chunk + sentence_with_period) <= max_length:
+            current_chunk += sentence_with_period
+        else:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            if len(sentence_with_period) > max_length:
+                words = sentence_with_period.split()
+                temp_chunk = ""
+                for word in words:
+                    if len(temp_chunk + word + " ") <= max_length:
+                        temp_chunk += word + " "
+                    else:
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                        temp_chunk = word + " "
+                if temp_chunk:
+                    current_chunk = temp_chunk
+            else:
+                current_chunk = sentence_with_period
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    return chunks
+
+def extract_video_id_from_url(url):
+    import re
+    if '&list=' in url or '&start_radio=' in url:
+        video_id_match = re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)([a-zA-Z0-9_-]+)', url)
+        if video_id_match:
+            return f"https://www.youtube.com/watch?v={video_id_match.group(1)}"
+    return url
+
+async def maybe_send_ad(bot, interaction):
+    if not bot.connection:
+        return
+    cursor = bot.connection.cursor()
+    cursor.execute("SELECT server_id FROM disableads_servers WHERE server_id = %s", (str(interaction.guild.id),))
+    if cursor.fetchone():
+        return
+    system_channels = []
+    for table in SYSTEM_CONFIG.values():
+        cursor.execute(f"SELECT channel_id FROM {table} WHERE server_id = %s", (str(interaction.guild.id),))
+        result = cursor.fetchone()
+        if result:
+            system_channels.append(int(result[0]))
+    cursor.close()
+    if random.random() < 0.2 and system_channels:
+        from cogs.utils.embeds import create_ads_embed, SupportButtons
+        embed = create_ads_embed()
+        view = SupportButtons()
+        channel_id = random.choice(system_channels)
+        channel = interaction.guild.get_channel(channel_id)
+        if channel:
+            await channel.send(embed=embed, view=view)
+
 class AnotherButtonEdit(nextcord.ui.View):
-    """Button view for another edit"""
     def __init__(self, maybe_send_ad_func):
         super().__init__()
         self.maybe_send_ad = maybe_send_ad_func
         self.add_item(nextcord.ui.Button(
             style=nextcord.ButtonStyle.gray,
-            label="Another Edit 👀",
+            label="Another Edit",
             custom_id="another_edit"
         ))
 
@@ -118,11 +174,10 @@ class AnotherButtonEdit(nextcord.ui.View):
         await self.maybe_send_ad(interaction)
 
 class AnotherButton(nextcord.ui.View):
-    """Button view for another overlay"""
     def __init__(self):
         super().__init__()
 
-    @nextcord.ui.button(label=f"Another One 👀", style=nextcord.ButtonStyle.gray)
+    @nextcord.ui.button(label=f"Another One", style=nextcord.ButtonStyle.gray)
     async def create_ronde(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         global current_overlay
         assets = [f for f in os.listdir("resources/overlays") if f.endswith(".mp4")]
@@ -134,14 +189,13 @@ class AnotherButton(nextcord.ui.View):
         await interaction.response.edit_message(file=nextcord.File(file_path))
 
 class GenerateHashtagsModal(nextcord.ui.Modal):
-    """Modal for generating hashtags"""
     def __init__(self, bot) -> None:
-        super().__init__("Generate Hastags #️⃣")
+        super().__init__("Generate Hashtags #")
 
         self.character_name = nextcord.ui.TextInput(
             label="Character Name",
             style=nextcord.TextInputStyle.paragraph,
-            placeholder="E.G: Ichigo Kurosaki (or you can leave this empty). 🤔",
+            placeholder="E.G: Ichigo Kurosaki (or you can leave this empty).",
             required=False,
             max_length=1500,
         )
@@ -150,28 +204,24 @@ class GenerateHashtagsModal(nextcord.ui.Modal):
         self.anime_name = nextcord.ui.TextInput(
             label="Anime Name",
             style=nextcord.TextInputStyle.paragraph,
-            placeholder="E.G: Bleach. 🤔",
+            placeholder="E.G: Bleach.",
             required=True,
             max_length=1500,
         )
         self.add_item(self.anime_name)
 
-    async def callback(self, interaction: nextcord.Interaction): 
+    async def callback(self, interaction: nextcord.Interaction):
         character_name = self.character_name.value.strip()
         anime_name = self.anime_name.value.strip()
-
         hashtags = generate_hashtags(character_name, anime_name)
-
         embed = nextcord.Embed(
             title="Hashtags Generator",
             description="",
             color=0x2a2a2a
         )
-
-        embed.add_field(name="Here are your Hashtags! 😉", value="```\n" + " ".join(hashtags) + "\n```", inline=False)
+        embed.add_field(name="Here are your Hashtags!", value="```\n" + " ".join(hashtags) + "\n```", inline=False)
         embed.set_footer(
-            text="© Ryujin Bot (2023-2025) | Hashtags Generator System",
+            text="(c) Ryujin Bot (2023-2025) | Hashtags Generator System",
             icon_url="https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
         )
-
-        await interaction.response.send_message(embed=embed, ephemeral=True) 
+        await interaction.response.send_message(embed=embed, ephemeral=True)
