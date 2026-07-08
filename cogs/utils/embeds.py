@@ -90,17 +90,6 @@ def create_ads_embed():
     
     return embed
 
-def create_blacklist_embed(user_id, reason):
-    """Creates a blacklist embed"""
-    embed = nextcord.Embed(
-        title="You are blacklisted!",
-        description=f"**You can't use Ryujin's functions anymore because you have been blacklisted for `{reason}`.**",
-        color=nextcord.Color.red()
-    )
-    embed.set_footer(text="© Ryujin Bot (2023-2025) | Info System")
-    embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
-    return embed
-
 def create_servers_embed(guilds, page=0, total_pages=1):
     """Creates a servers list embed"""
     embed = nextcord.Embed(title="Ryujin Servers", color=0x2a2a2a)
