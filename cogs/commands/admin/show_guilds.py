@@ -1,16 +1,17 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.base import RyujinCog
 
 class ShowGuildsCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="show_guilds",
         description="Shows all the guilds that Ryujin is in!",
     )
-    async def show_guilds(self, interaction: nextcord.Interaction):
+    async def show_guilds(self, interaction: discord.Interaction):
         if await self.blacklist_guard(interaction):
             return
 
@@ -30,7 +31,7 @@ class ShowGuildsCog(RyujinCog):
                     
                     fields.append((truncated_name, f"{guild.member_count} members\nOwner: **{guild.owner}**"))
                 
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title=f"Info about the guilds that Ryujin is in (Part {index + 1})",
                     description=f"<@1060316037997936751> is in **{len(guilds)}** guilds."
                 )
@@ -44,9 +45,9 @@ class ShowGuildsCog(RyujinCog):
                     embed.add_field(name=name, value=value)
                 
                 await self.bot.maybe_send_ad(interaction)
-                await interaction.send(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await interaction.send("This command is working only for `moongetsu`.", ephemeral=True)
+            await interaction.response.send_message("This command is working only for `moongetsu`.", ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(ShowGuildsCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(ShowGuildsCog(bot)) 

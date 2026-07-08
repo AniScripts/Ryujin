@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 
 from services.media import resize_video
@@ -9,13 +10,14 @@ from cogs.utils.base import RyujinCog
 class ResizeVideoCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(name="resize_video", description="Resize a video to a specific resolution while maintaining aspect ratio")
+    @app_commands.command(name="resize_video", description="Resize a video to a specific resolution while maintaining aspect ratio")
+    @app_commands.describe(width="Target width in pixels", height="Target height in pixels")
     async def resize_video(
         self,
-        interaction: nextcord.Interaction,
-        video: nextcord.Attachment,
-        width: int = nextcord.SlashOption(description="Target width in pixels", required=True),
-        height: int = nextcord.SlashOption(description="Target height in pixels", required=True),
+        interaction: discord.Interaction,
+        video: discord.Attachment,
+        width: int,
+        height: int,
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -42,7 +44,7 @@ class ResizeVideoCog(RyujinCog):
                 f"Original: {original_size/1024/1024:.2f} MB\n"
                 f"Resized: {resized_size/1024/1024:.2f} MB\n"
                 f"Resolution: {width}x{height}",
-                file=nextcord.File(output_path),
+                file=discord.File(output_path),
                 ephemeral=True,
             )
             await self.bot.maybe_send_ad(interaction)
@@ -57,5 +59,5 @@ class ResizeVideoCog(RyujinCog):
                     pass
 
 
-def setup(bot):
-    bot.add_cog(ResizeVideoCog(bot))
+async def setup(bot):
+    await bot.add_cog(ResizeVideoCog(bot))

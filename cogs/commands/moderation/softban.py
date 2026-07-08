@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from datetime import datetime, timedelta
 from cogs.utils.base import RyujinCog
 
@@ -34,56 +35,42 @@ class SoftbanCog(RyujinCog):
                 return timedelta(hours=hours)
         except ValueError:
             return None
-    @nextcord.slash_command(
+    @app_commands.command(
         name="softban",
-        description="Softban a member (ban and immediately unban to delete their messages).",
-        default_member_permissions=nextcord.Permissions(ban_members=True)
+        default_member_permissions=discord.Permissions(ban_members=True)
     )
     async def softban(
         self,
-        interaction: nextcord.Interaction,
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="The user to softban",
-            required=True
-        ),
-        duration: str = nextcord.SlashOption(
-            name="duration",
-            description="Softban duration (e.g., 1d, 2h, 30m, permanent)",
-            required=False
-        ),
-        reason: str = nextcord.SlashOption(
-            name="reason",
-            description="Reason for the softban",
-            required=False
-        )
-    ):
+        interaction: discord.Interaction,
+        user: discord.Member ,
+        duration: str,
+        reason: str):
         if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.ban_members:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You don't have permission to use this command.",
                 ephemeral=True
             )
             return
 
         if not interaction.guild.me.guild_permissions.ban_members:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ I don't have permission to use this command.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.user.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't use this command due to role hierarchy.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.guild.me.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ I can't use this command due to role hierarchy.",
                 ephemeral=True
             )
@@ -98,14 +85,14 @@ class SoftbanCog(RyujinCog):
 
         try:
             try:
-                dm_embed = nextcord.Embed(
+                dm_embed = discord.Embed(
                     title="🧹 You have been softbanned",
                     description=f"You have been softbanned from **{interaction.guild.name}**\n\n"
                               f"**What is a softban?**\nA softban removes all your messages from the server and kicks you, but you can rejoin immediately.\n\n"
                               f"**Reason:** {softban_reason}\n"
                               f"**Softbanned by:** {interaction.user.mention} ({interaction.user.name})\n"
                               f"**Duration:** {'Permanent' if is_permanent else duration}",
-                    color=nextcord.Color.orange()
+                    color=discord.Color.orange()
                 )
                 
                 dm_embed.set_footer(
@@ -136,10 +123,10 @@ class SoftbanCog(RyujinCog):
             description += f"**User Status:** ✅ User can rejoin immediately\n"
             description += f"**DM Status:** {'✅ DM sent to user' if dm_sent else '❌ Could not send DM (DMs closed)'}"
             
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="🧹 User Softbanned",
                 description=description,
-                color=nextcord.Color.orange()
+                color=discord.Color.orange()
             )
             
             embed.set_footer(
@@ -153,18 +140,18 @@ class SoftbanCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
-        except nextcord.Forbidden:
-            await interaction.send(
+        except discord.Forbidden:
+            await interaction.response.send_message(
                 "❌ I don't have permission to softban this user.",
                 ephemeral=True
             )
         except Exception as e:
-            await interaction.send(
+            await interaction.response.send_message(
                 f"❌ An error occurred while softbanning the user: `{e}`",
                 ephemeral=True
             )
 
-def setup(bot):
-    bot.add_cog(SoftbanCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(SoftbanCog(bot)) 

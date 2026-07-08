@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from datetime import datetime
 from cogs.utils.base import RyujinCog
 
@@ -7,11 +8,11 @@ class HelpCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="help",
         description="Shows all Ryujin's commands!",
     )
-    async def help(self, interaction: nextcord.Interaction):
+    async def help(self, interaction: discord.Interaction):
         if await self.blacklist_guard(interaction):
             return
 
@@ -88,7 +89,7 @@ class HelpCog(RyujinCog):
             ]
         }
 
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Ryujin Command Guide",
             description="Here's everything I can help you with:",
             color=0x2a2a2a
@@ -111,7 +112,7 @@ class HelpCog(RyujinCog):
             icon_url=self.logo
         )
         await self.bot.maybe_send_ad(interaction)
-        await interaction.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(HelpCog(bot))
+async def setup(bot):
+    await bot.add_cog(HelpCog(bot))

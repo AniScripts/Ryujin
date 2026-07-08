@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 
 from services.media import pitch_shift
@@ -10,8 +11,8 @@ class NightcoreCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="nightcore", description="Converts an uploaded audio file into a Nightcore version.")
-    async def nightcore_command(self, interaction: nextcord.Interaction, song: nextcord.Attachment):
+    @app_commands.command(name="nightcore", description="Converts an uploaded audio file into a Nightcore version.")
+    async def nightcore_command(self, interaction: discord.Interaction, song: discord.Attachment):
         user_id = interaction.user.id
         if await self.blacklist_guard(interaction):
             return
@@ -30,7 +31,7 @@ class NightcoreCog(RyujinCog):
 
             await pitch_shift(audio_path, output_path, 2)
             await self.bot.maybe_send_ad(interaction)
-            await interaction.followup.send(file=nextcord.File(output_path), ephemeral=True)
+            await interaction.followup.send(file=discord.File(output_path), ephemeral=True)
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {e}", ephemeral=True)
         finally:
@@ -42,5 +43,5 @@ class NightcoreCog(RyujinCog):
                     pass
 
 
-def setup(bot):
-    bot.add_cog(NightcoreCog(bot))
+async def setup(bot):
+    await bot.add_cog(NightcoreCog(bot))

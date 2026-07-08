@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import logging
 import asyncio
 from datetime import datetime
@@ -25,7 +25,7 @@ class BackgroundTasks(commands.Cog):
         channel = self.bot.get_channel(int(self.bot.welcome_leave_channel))
         if not channel:
             return
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Ryujin has been added to a new server!",
             description=f"**{guild.name}** has added Ryujin to their server!\n\n**Server Information:**\n- Members: {guild.member_count}\n- Created: <t:{int(guild.created_at.timestamp())}:R>",
             color=0x2a2a2a
@@ -40,7 +40,7 @@ class BackgroundTasks(commands.Cog):
         channel = self.bot.get_channel(int(self.bot.welcome_leave_channel))
         if not channel:
             return
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Ryujin has been removed from a server!",
             description=f"**{guild.name}** has removed Ryujin from their server.\nWas Added: <t:{int(guild.me.joined_at.timestamp())}:R>",
             color=0xff0000
@@ -53,13 +53,13 @@ class BackgroundTasks(commands.Cog):
     async def change_status(self):
         while True:
             statuses = [
-                nextcord.Activity(name="Editing tools at your service", type=nextcord.ActivityType.playing),
-                nextcord.Activity(name="AMV community growing", type=nextcord.ActivityType.watching),
-                nextcord.Activity(name="suggestions in support server", type=nextcord.ActivityType.listening),
-                nextcord.Activity(name="Ryujin v0.7b", type=nextcord.ActivityType.playing),
+                discord.Activity(name="Editing tools at your service", type=discord.ActivityType.playing),
+                discord.Activity(name="AMV community growing", type=discord.ActivityType.watching),
+                discord.Activity(name="suggestions in support server", type=discord.ActivityType.listening),
+                discord.Activity(name="Ryujin v0.7b", type=discord.ActivityType.playing),
             ]
             for status in statuses:
-                await self.bot.change_presence(status=nextcord.Status.dnd, activity=status)
+                await self.bot.change_presence(status=discord.Status.dnd, activity=status)
                 await asyncio.sleep(10)
 
     async def update_info_message(self):
@@ -79,7 +79,7 @@ class BackgroundTasks(commands.Cog):
                     try:
                         message = await info_channel.fetch_message(int(message_config["Info"]["message_id"]))
                         await message.edit(embed=info_embed)
-                    except (nextcord.NotFound, nextcord.HTTPException):
+                    except (discord.NotFound, discord.HTTPException):
                         message = await info_channel.send(embed=info_embed)
                         message_config["Info"]["message_id"] = str(message.id)
                         save_messages_config(message_config)
@@ -110,7 +110,7 @@ class BackgroundTasks(commands.Cog):
                     try:
                         message = await servers_channel.fetch_message(int(message_config["Servers"]["message_id"]))
                         await message.edit(embed=pages[0])
-                    except (nextcord.NotFound, nextcord.HTTPException):
+                    except (discord.NotFound, discord.HTTPException):
                         message = await servers_channel.send(embed=pages[0])
                         message_config["Servers"]["message_id"] = str(message.id)
                         save_messages_config(message_config)
@@ -122,5 +122,5 @@ class BackgroundTasks(commands.Cog):
                 await asyncio.sleep(60)
 
 
-def setup(bot):
-    bot.add_cog(BackgroundTasks(bot))
+async def setup(bot):
+    await bot.add_cog(BackgroundTasks(bot))

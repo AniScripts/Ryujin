@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 from cogs.utils.constants import RYUJIN_LOGO
 
@@ -18,10 +18,10 @@ class RyujinCog(commands.Cog):
         return False, None
 
     def blacklist_embed(self, reason):
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="You are blacklisted!",
             description=f"**You can't use Ryujin's commands anymore because you have been blacklisted for `{reason}`.**",
-            color=nextcord.Color.red(),
+            color=discord.Color.red(),
         )
         embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Blacklist System", icon_url=RYUJIN_LOGO)
         embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
@@ -30,6 +30,6 @@ class RyujinCog(commands.Cog):
     async def blacklist_guard(self, interaction):
         blocked, reason = self.is_blacklisted(interaction.user.id)
         if blocked:
-            await interaction.send(embed=self.blacklist_embed(reason), ephemeral=True)
+            await interaction.response.send_message(embed=self.blacklist_embed(reason), ephemeral=True)
             return True
         return False

@@ -1,7 +1,7 @@
 import os
 import random
 import asyncio
-import nextcord
+import discord
 
 from cogs.utils.constants import SYSTEM_CONFIG
 
@@ -151,34 +151,34 @@ async def maybe_send_ad(bot, interaction):
         if channel:
             await channel.send(embed=embed, view=view)
 
-class AnotherButtonEdit(nextcord.ui.View):
+class AnotherButtonEdit(discord.ui.View):
     def __init__(self, maybe_send_ad_func):
         super().__init__()
         self.maybe_send_ad = maybe_send_ad_func
-        self.add_item(nextcord.ui.Button(
-            style=nextcord.ButtonStyle.gray,
+        self.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.gray,
             label="Another Edit",
             custom_id="another_edit"
         ))
 
-    @nextcord.ui.button(
-        style=nextcord.ButtonStyle.gray,
+    @discord.ui.button(
+        style=discord.ButtonStyle.gray,
         label="Another Edit",
         custom_id="another_edit"
     )
-    async def another_edit(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    async def another_edit(self, button: discord.ui.Button, interaction: discord.Interaction):
         with open("edits.txt", "r") as f:
             lines = f.read().strip().split("\n")
         new_link = random.choice(lines)
         await interaction.response.edit_message(content=new_link, view=self)
         await self.maybe_send_ad(interaction)
 
-class AnotherButton(nextcord.ui.View):
+class AnotherButton(discord.ui.View):
     def __init__(self):
         super().__init__()
 
-    @nextcord.ui.button(label=f"Another One", style=nextcord.ButtonStyle.gray)
-    async def create_ronde(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label=f"Another One", style=discord.ButtonStyle.gray)
+    async def create_ronde(self, button: discord.ui.Button, interaction: discord.Interaction):
         global current_overlay
         assets = [f for f in os.listdir("resources/overlays") if f.endswith(".mp4")]
         new_overlay = random.choice(assets)
@@ -186,35 +186,35 @@ class AnotherButton(nextcord.ui.View):
             new_overlay = random.choice(assets)
         current_overlay = new_overlay
         file_path = os.path.join("resources/overlays", current_overlay)
-        await interaction.response.edit_message(file=nextcord.File(file_path))
+        await interaction.response.edit_message(file=discord.File(file_path))
 
-class GenerateHashtagsModal(nextcord.ui.Modal):
+class GenerateHashtagsModal(discord.ui.Modal):
     def __init__(self, bot) -> None:
         super().__init__("Generate Hashtags #")
 
-        self.character_name = nextcord.ui.TextInput(
+        self.character_name = discord.ui.TextInput(
             label="Character Name",
-            style=nextcord.TextInputStyle.paragraph,
+            style=discord.TextInputStyle.paragraph,
             placeholder="E.G: Ichigo Kurosaki (or you can leave this empty).",
             required=False,
             max_length=1500,
         )
         self.add_item(self.character_name)
 
-        self.anime_name = nextcord.ui.TextInput(
+        self.anime_name = discord.ui.TextInput(
             label="Anime Name",
-            style=nextcord.TextInputStyle.paragraph,
+            style=discord.TextInputStyle.paragraph,
             placeholder="E.G: Bleach.",
             required=True,
             max_length=1500,
         )
         self.add_item(self.anime_name)
 
-    async def callback(self, interaction: nextcord.Interaction):
+    async def callback(self, interaction: discord.Interaction):
         character_name = self.character_name.value.strip()
         anime_name = self.anime_name.value.strip()
         hashtags = generate_hashtags(character_name, anime_name)
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Hashtags Generator",
             description="",
             color=0x2a2a2a

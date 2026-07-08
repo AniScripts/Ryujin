@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import platform
 import psutil
 from datetime import datetime
@@ -9,11 +10,11 @@ class BotStatsCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="bot_stats",
         description="Display detailed statistics about the bot.",
     )
-    async def bot_stats(self, interaction: nextcord.Interaction):
+    async def bot_stats(self, interaction: discord.Interaction):
         if await self.blacklist_guard(interaction):
             return
 
@@ -40,10 +41,10 @@ class BotStatsCog(RyujinCog):
             f"🔄 **Bot Version:** 0.6b\n"
             f"👨‍💻 **Bot Developer:** moongetsu\n\n"
             f"**Python Version:** {platform.python_version()}\n"
-            f"**Nextcord Version:** {nextcord.__version__}"
+            f"**Nextcord Version:** {discord.__version__}"
         )
         
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="📊 Ryujin Statistics",
             description=description,
             color=0x2a2a2a,
@@ -57,7 +58,7 @@ class BotStatsCog(RyujinCog):
             icon_url=self.logo
         )
         await self.bot.maybe_send_ad(interaction)
-        await interaction.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(BotStatsCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(BotStatsCog(bot)) 

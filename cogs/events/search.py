@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import logging
 import asyncio
 import aiohttp
@@ -54,14 +54,14 @@ class SearchListeners(commands.Cog):
         try:
             result = await anime_search(attachment.url)
             if not result.get('result') or len(result['result']) == 0:
-                embed = nextcord.Embed(title="No Match Found", description="Sorry, I couldn't find any matching anime for this image.", color=0xed4245)
+                embed = discord.Embed(title="No Match Found", description="Sorry, I couldn't find any matching anime for this image.", color=0xed4245)
                 await message.channel.send(embed=embed)
                 return
 
             best_match = result['result'][0]
             anilist = best_match['anilist']
 
-            embed = nextcord.Embed(title="Anime Found!", description="Here's what I found:", color=0x2a2a2a)
+            embed = discord.Embed(title="Anime Found!", description="Here's what I found:", color=0x2a2a2a)
             titles = f"English: {anilist['title']['english']}\nRomaji: {anilist['title']['romaji']}\nNative: {anilist['title']['native']}"
             embed.add_field(name="Anime Title", value=f"```{titles}```", inline=False)
             embed.add_field(name="Episode", value=f"```{best_match.get('episode', 'Unknown')}```", inline=True)
@@ -79,7 +79,7 @@ class SearchListeners(commands.Cog):
 
         except Exception as e:
             logging.error("Anime search error: %s", e)
-            embed = nextcord.Embed(title="Error", description="Sorry, there was an error processing your request.", color=0xff0000)
+            embed = discord.Embed(title="Error", description="Sorry, there was an error processing your request.", color=0xff0000)
             embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Anime Search System", icon_url=RYUJIN_LOGO)
             await message.channel.send(embed=embed)
 
@@ -114,14 +114,14 @@ class SearchListeners(commands.Cog):
             result = await song_search(source)
 
             if not result or 'track' not in result:
-                embed = nextcord.Embed(title="No Match Found", description="Sorry, I couldn't identify any song.", color=0xed4245)
+                embed = discord.Embed(title="No Match Found", description="Sorry, I couldn't identify any song.", color=0xed4245)
                 embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Song Finder System", icon_url=RYUJIN_LOGO)
                 embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
                 await message.channel.send(embed=embed)
                 return
 
             track = result['track']
-            embed = nextcord.Embed(title="Song Found!", description="Here's what I found:", color=0x2a2a2a)
+            embed = discord.Embed(title="Song Found!", description="Here's what I found:", color=0x2a2a2a)
             embed.add_field(name="Title", value=f"```{track.get('title', 'Unknown')}```", inline=True)
             embed.add_field(name="Artist", value=f"```{track.get('subtitle', 'Unknown Artist')}```", inline=True)
 
@@ -148,7 +148,7 @@ class SearchListeners(commands.Cog):
 
         except Exception as e:
             logging.error("Song search error: %s", e)
-            embed = nextcord.Embed(title="Error", description=f"An error occurred: {str(e)}", color=0xff0000)
+            embed = discord.Embed(title="Error", description=f"An error occurred: {str(e)}", color=0xff0000)
             embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Song Finder System", icon_url=RYUJIN_LOGO)
             embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
             await message.channel.send(embed=embed)
@@ -175,7 +175,7 @@ class SearchListeners(commands.Cog):
             image_data = await attachment.read()
             data = await font_search(image_data)
 
-            embed = nextcord.Embed(title="Font Search Results", description="Here are the closest matching fonts I found:", color=0x2b2d31)
+            embed = discord.Embed(title="Font Search Results", description="Here are the closest matching fonts I found:", color=0x2b2d31)
             for i, font in enumerate(data['fonts'][:5], 1):
                 embed.add_field(
                     name=f"Match #{i}: {font['name']}",
@@ -189,10 +189,10 @@ class SearchListeners(commands.Cog):
 
         except Exception as e:
             logging.error("Font search error: %s", e)
-            embed = nextcord.Embed(title="Error", description="Sorry, there was an error processing your request.", color=0xff0000)
+            embed = discord.Embed(title="Error", description="Sorry, there was an error processing your request.", color=0xff0000)
             embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Font Search System", icon_url=RYUJIN_LOGO)
             await message.channel.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(SearchListeners(bot))
+async def setup(bot):
+    await bot.add_cog(SearchListeners(bot))

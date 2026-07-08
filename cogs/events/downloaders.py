@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import logging
 import os
 import time
@@ -95,7 +95,7 @@ class DownloaderListeners(commands.Cog):
         try:
             files = await download_tiktok_video(content)
             duration = time.time() - start
-            discord_files = [nextcord.File(path) for path in files]
+            discord_files = [discord.File(path) for path in files]
             await message.channel.send(
                 f"**Your TikTok video has been downloaded in `{duration:.2f}` seconds.**",
                 files=discord_files,
@@ -113,7 +113,7 @@ class DownloaderListeners(commands.Cog):
         try:
             files = await download_instagram_content(content)
             duration = time.time() - start
-            discord_files = [nextcord.File(path) for path in files]
+            discord_files = [discord.File(path) for path in files]
             await message.channel.send(
                 f"**Your Instagram content has been downloaded in `{duration:.2f}` seconds.**",
                 files=discord_files,
@@ -134,7 +134,7 @@ class DownloaderListeners(commands.Cog):
             with open(file_path, 'rb') as f:
                 await message.channel.send(
                     f"**Your {label} has been downloaded in `{duration:.2f}` seconds.**",
-                    file=nextcord.File(f, filename=os.path.basename(file_path)),
+                    file=discord.File(f, filename=os.path.basename(file_path)),
                 )
             try:
                 os.remove(file_path)
@@ -145,5 +145,5 @@ class DownloaderListeners(commands.Cog):
             await message.channel.send(f"**Sorry, can't download that {label}. Error: `{e}`**")
 
 
-def setup(bot):
-    bot.add_cog(DownloaderListeners(bot))
+async def setup(bot):
+    await bot.add_cog(DownloaderListeners(bot))

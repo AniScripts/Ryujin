@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 import json
 from cogs.utils.base import RyujinCog
@@ -7,11 +8,11 @@ from cogs.utils.base import RyujinCog
 class ScriptCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(
+    @app_commands.command(
         name="script",
         description="Sends a script for After Effects.",
     )
-    async def script(self, interaction: nextcord.Interaction, script_number: int):
+    async def script(self, interaction: discord.Interaction, script_number: int):
         if await self.blacklist_guard(interaction):
             return
 
@@ -23,7 +24,7 @@ class ScriptCog(RyujinCog):
         try:
             script_name = script_files.get(str(script_number))
         except KeyError:
-            return await interaction.send(f"No script found with number {script_number}.", ephemeral=True)
+            return await interaction.response.send_message(f"No script found with number {script_number}.", ephemeral=True)
 
         script_path = os.path.join(script_files_dir, script_name.replace(" ", "_"))
 
@@ -40,12 +41,12 @@ class ScriptCog(RyujinCog):
                             preview_link = f.read().strip()
 
             if script_file and preview_link:
-                await interaction.send(f"{preview_link}", file=nextcord.File(script_file), ephemeral=True)
+                await interaction.response.send_message(f"{preview_link}", file=discord.File(script_file), ephemeral=True)
                 await self.bot.maybe_send_ad(interaction)
             else:
-                await interaction.send(f"Script file or preview link not found for {script_name}.", ephemeral=True)
+                await interaction.response.send_message(f"Script file or preview link not found for {script_name}.", ephemeral=True)
         else:
-            await interaction.send(f"The specified script file for {script_name} does not exist.", ephemeral=True)
+            await interaction.response.send_message(f"The specified script file for {script_name} does not exist.", ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(ScriptCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(ScriptCog(bot)) 

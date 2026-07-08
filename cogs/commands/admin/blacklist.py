@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from mysql.connector import Error
 from cogs.utils.db import add_to_blacklist, remove_from_blacklist, get_blacklist
 from cogs.utils.base import RyujinCog
@@ -7,33 +8,19 @@ from cogs.utils.base import RyujinCog
 class BlacklistCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(
+    @app_commands.command(
         name="blacklist",
         description="Manage user blacklist (Development only)",
         guild_ids=[1060144274722787328]
     )
     async def blacklist(
         self,
-        interaction: nextcord.Interaction,
-        action: str = nextcord.SlashOption(
-            name="action",
-            description="Action to perform",
-            choices={"Add": "add", "Remove": "remove", "List": "list", "Check": "check"},
-            required=True
-        ),
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="User to blacklist/remove from blacklist",
-            required=False
-        ),
-        reason: str = nextcord.SlashOption(
-            name="reason",
-            description="Reason for blacklisting",
-            required=False
-        )
-    ):
+        interaction: discord.Interaction,
+        action: str,
+        user: discord.Member ,
+        reason: str):
         if interaction.user.id != 977190163736322088:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="❌ Access Denied",
                 description="You don't have permission to use this command. Only the bot owner can manage the blacklist.",
                 color=0xff0000
@@ -52,7 +39,7 @@ class BlacklistCog(RyujinCog):
         try:
             if action == "add":
                 if not user:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="❌ Error",
                         description="Please specify a user to blacklist.",
                         color=0xff0000
@@ -75,7 +62,7 @@ class BlacklistCog(RyujinCog):
                 
                 self.bot.blacklist = get_blacklist(self.bot.connection)
                 
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title="✅ User Blacklisted",
                     description=f"**{user.mention}** has been added to the blacklist.\n\n**Reason:** {reason}",
                     color=0xff0000
@@ -93,7 +80,7 @@ class BlacklistCog(RyujinCog):
 
             elif action == "remove":
                 if not user:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="❌ Error",
                         description="Please specify a user to remove from blacklist.",
                         color=0xff0000
@@ -114,7 +101,7 @@ class BlacklistCog(RyujinCog):
                 if removed:
                     self.bot.blacklist = get_blacklist(self.bot.connection)
                     
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="✅ User Removed from Blacklist",
                         description=f"**{user.mention}** has been removed from the blacklist.",
                         color=0x00ff00
@@ -130,7 +117,7 @@ class BlacklistCog(RyujinCog):
                     )
                     await interaction.response.send_message(embed=embed, ephemeral=True)
                 else:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="❌ User Not Found",
                         description=f"**{user.mention}** is not in the blacklist.",
                         color=0xff0000
@@ -149,7 +136,7 @@ class BlacklistCog(RyujinCog):
                 blacklist = get_blacklist(self.bot.connection)
                 
                 if not blacklist:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="📋 Blacklist",
                         description="No users are currently blacklisted.",
                         color=0x2a2a2a
@@ -165,7 +152,7 @@ class BlacklistCog(RyujinCog):
                     await interaction.response.send_message(embed=embed, ephemeral=True)
                     return
 
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title="📋 Blacklisted Users",
                     description=f"Total blacklisted users: **{len(blacklist)}**",
                     color=0x2a2a2a
@@ -205,7 +192,7 @@ class BlacklistCog(RyujinCog):
 
             elif action == "check":
                 if not user:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="❌ Error",
                         description="Please specify a user to check.",
                         color=0xff0000
@@ -224,14 +211,14 @@ class BlacklistCog(RyujinCog):
                 blacklist = get_blacklist(self.bot.connection)
                 
                 if user.id in blacklist:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="🔴 User is Blacklisted",
                         description=f"**{user.mention}** is currently blacklisted.\n\n**Reason:** {blacklist[user.id]}",
                         color=0xff0000
                     )
                     embed.set_thumbnail(url=user.display_avatar.url)
                 else:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title="🟢 User is Not Blacklisted",
                         description=f"**{user.mention}** is not in the blacklist.",
                         color=0x00ff00
@@ -249,7 +236,7 @@ class BlacklistCog(RyujinCog):
                 await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Error as e:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="❌ Database Error",
                 description=f"An error occurred while accessing the database: {str(e)}",
                 color=0xff0000
@@ -265,7 +252,7 @@ class BlacklistCog(RyujinCog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="❌ Error",
                 description=f"An unexpected error occurred: {str(e)}",
                 color=0xff0000
@@ -280,5 +267,5 @@ class BlacklistCog(RyujinCog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(BlacklistCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(BlacklistCog(bot)) 

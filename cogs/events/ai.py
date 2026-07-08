@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import logging
 import asyncio
 
@@ -34,10 +34,10 @@ class RyujinAIListener(commands.Cog):
 
         user_id = message.author.id
         if user_id in self.bot.blacklist:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="You are blacklisted!",
                 description=f"**You can't use Ryujin's functions anymore because you have been blacklisted for `{self.bot.blacklist[user_id]}`.**",
-                color=nextcord.Color.red()
+                color=discord.Color.red()
             )
             embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Blacklist System")
             embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
@@ -58,13 +58,13 @@ class RyujinAIListener(commands.Cog):
                 else:
                     chunks = split_long_text(response)
                     first = chunks[0][:4096]
-                    embed = nextcord.Embed(title="Ryujin AI Response", description=first, color=0x2a2a2a)
+                    embed = discord.Embed(title="Ryujin AI Response", description=first, color=0x2a2a2a)
                     embed.set_footer(text=f"(c) Ryujin Bot (2023-2025) | AI System | Page 1/{len(chunks)}", icon_url=RYUJIN_LOGO)
                     embed.set_author(name="Ryujin AI", icon_url=RYUJIN_LOGO)
                     embed.add_field(name="Asked by", value=f"{message.author.mention} ({message.author.name})", inline=False)
                     await message.reply(embed=embed)
                     for i, chunk in enumerate(chunks[1:], 1):
-                        embed = nextcord.Embed(
+                        embed = discord.Embed(
                             title="Ryujin AI Response (Continued)",
                             description=chunk[:4096],
                             color=0x2a2a2a,
@@ -76,7 +76,7 @@ class RyujinAIListener(commands.Cog):
                 log.info("AI response sent to %s in '%s'", message.author, message.guild)
 
             except Exception as e:
-                error_embed = nextcord.Embed(
+                error_embed = discord.Embed(
                     title="AI Error",
                     description=f"Sorry, I encountered an error: `{str(e)}`\n\nPlease try again in a moment!",
                     color=0xff0000,
@@ -87,5 +87,5 @@ class RyujinAIListener(commands.Cog):
                 log.error("AI error for %s: %s", message.author, e)
 
 
-def setup(bot):
-    bot.add_cog(RyujinAIListener(bot))
+async def setup(bot):
+    await bot.add_cog(RyujinAIListener(bot))

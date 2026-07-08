@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.db import get_user_warnings, get_warning_count
 from datetime import datetime
 from cogs.utils.base import RyujinCog
@@ -8,25 +9,21 @@ class WarnsCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="warns",
         description="Display all warnings for a member.",
-        default_member_permissions=nextcord.Permissions(manage_messages=True)
+        default_member_permissions=discord.Permissions(manage_messages=True)
     )
     async def warns(
         self,
-        interaction: nextcord.Interaction,
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="The user to check warnings for",
-            required=True
-        )
+        interaction: discord.Interaction,
+        user: discord.Member 
     ):
         if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_messages:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You don't have permission to use this command.",
                 ephemeral=True
             )
@@ -46,12 +43,12 @@ class WarnsCog(RyujinCog):
             )
 
             if not warnings:
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title="📋 Warning History",
                     description=f"**User:** {user.mention} ({user.name})\n"
                               f"**Total Warnings:** 0\n"
                               f"**Status:** ✅ Clean record",
-                    color=nextcord.Color.green()
+                    color=discord.Color.green()
                 )
                 
                 embed.set_footer(
@@ -65,7 +62,7 @@ class WarnsCog(RyujinCog):
                 )
 
                 await self.bot.maybe_send_ad(interaction)
-                await interaction.send(embed=embed, ephemeral=True)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
                 return
 
             warning_list = []
@@ -104,13 +101,13 @@ class WarnsCog(RyujinCog):
             if len(warning_list) > 10:
                 warnings_text += f"\n\n*... and {len(warning_list) - 10} more warnings*"
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="📋 Warning History",
                 description=f"**User:** {user.mention} ({user.name})\n"
                           f"**Total Warnings:** {total_warnings}\n"
                           f"**Status:** {status}\n\n"
                           f"**Recent Warnings:**\n{warnings_text}",
-                color=nextcord.Color.orange() if total_warnings > 0 else nextcord.Color.green()
+                color=discord.Color.orange() if total_warnings > 0 else discord.Color.green()
             )
             
             embed.set_footer(
@@ -124,13 +121,13 @@ class WarnsCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
-            await interaction.send(
+            await interaction.response.send_message(
                 f"❌ An error occurred while fetching warnings: `{e}`",
                 ephemeral=True
             )
 
-def setup(bot):
-    bot.add_cog(WarnsCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(WarnsCog(bot)) 

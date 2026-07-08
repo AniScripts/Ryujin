@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import logging
 import asyncio
 import aiohttp
@@ -32,10 +32,10 @@ class RemoveBgListener(commands.Cog):
 
         user_id = message.author.id
         if user_id in self.bot.blacklist:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="You are blacklisted!",
                 description=f"**You can't use Ryujin's functions anymore because you have been blacklisted for `{self.bot.blacklist[user_id]}`.**",
-                color=nextcord.Color.red()
+                color=discord.Color.red()
             )
             embed.set_footer(text="(c) Ryujin Bot (2023-2025) | Info System")
             embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
@@ -66,7 +66,7 @@ class RemoveBgListener(commands.Cog):
             await processing_msg.delete()
             await message.channel.send(
                 "**Background removed successfully!**",
-                file=nextcord.File(result, "removebg.png"),
+                file=discord.File(result, "removebg.png"),
             )
             logging.info("Remove Background processed for %s in '%s'.", message.author, message.guild)
 
@@ -81,5 +81,5 @@ class RemoveBgListener(commands.Cog):
             await message.delete()
 
 
-def setup(bot):
-    bot.add_cog(RemoveBgListener(bot))
+async def setup(bot):
+    await bot.add_cog(RemoveBgListener(bot))

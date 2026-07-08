@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.db import add_warning, get_warning_count
 from cogs.utils.base import RyujinCog
 
@@ -7,51 +8,42 @@ class WarnCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="warn",
         description="Warn a member for breaking the rules.",
-        default_member_permissions=nextcord.Permissions(manage_messages=True)
+        default_member_permissions=discord.Permissions(manage_messages=True)
     )
     async def warn(
         self,
-        interaction: nextcord.Interaction,
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="The user to warn",
-            required=True
-        ),
-        reason: str = nextcord.SlashOption(
-            name="reason",
-            description="Reason for the warning",
-            required=True
-        )
-    ):
+        interaction: discord.Interaction,
+        user: discord.Member ,
+        reason: str):
         if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_messages:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You don't have permission to use this command.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.user.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't use this command due to role hierarchy.",
                 ephemeral=True
             )
             return
 
         if user.id == interaction.user.id:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't warn yourself.",
                 ephemeral=True
             )
             return
 
         if user.id == self.bot.user.id:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't warn the bot.",
                 ephemeral=True
             )
@@ -67,7 +59,7 @@ class WarnCog(RyujinCog):
             )
 
             if warning_id is None:
-                await interaction.send(
+                await interaction.response.send_message(
                     "❌ Failed to add warning to database.",
                     ephemeral=True
                 )
@@ -80,14 +72,14 @@ class WarnCog(RyujinCog):
             )
 
             try:
-                dm_embed = nextcord.Embed(
+                dm_embed = discord.Embed(
                     title="⚠️ You have been warned",
                     description=f"You have received a warning in **{interaction.guild.name}**\n\n"
                               f"**Reason:** {reason}\n"
                               f"**Warned by:** {interaction.user.mention} ({interaction.user.name})\n"
                               f"**Warning ID:** #{warning_id}\n"
                               f"**Total Warnings:** {total_warnings}",
-                    color=nextcord.Color.yellow()
+                    color=discord.Color.yellow()
                 )
                 
                 dm_embed.set_footer(
@@ -100,7 +92,7 @@ class WarnCog(RyujinCog):
             except:
                 dm_sent = False
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="⚠️ User Warned",
                 description=f"**{user.mention}** has been warned.\n\n"
                           f"**User:** {user.mention} ({user.name})\n"
@@ -109,7 +101,7 @@ class WarnCog(RyujinCog):
                           f"**Warning ID:** #{warning_id}\n"
                           f"**Total Warnings:** {total_warnings}\n"
                           f"**DM Status:** {'✅ DM sent to user' if dm_sent else '❌ Could not send DM (DMs closed)'}",
-                color=nextcord.Color.yellow()
+                color=discord.Color.yellow()
             )
             
             embed.set_footer(
@@ -123,13 +115,13 @@ class WarnCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
-            await interaction.send(
+            await interaction.response.send_message(
                 f"❌ An error occurred while warning the user: `{e}`",
                 ephemeral=True
             )
 
-def setup(bot):
-    bot.add_cog(WarnCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(WarnCog(bot)) 

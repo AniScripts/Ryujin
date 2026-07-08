@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import asyncio
 
 from cogs.utils.constants import RYUJIN_LOGO
@@ -72,12 +73,12 @@ SYSTEM_CONFIG = {
 }
 
 
-class SetupSelect(nextcord.ui.Select):
+class SetupSelect(discord.ui.Select):
     def __init__(self, bot):
         options = []
         for table, cfg in SYSTEM_CONFIG.items():
             options.append(
-                nextcord.SelectOption(
+                discord.SelectOption(
                     label=cfg["label"],
                     description=cfg["description"][:100],
                     emoji=cfg["emoji"],
@@ -92,7 +93,7 @@ class SetupSelect(nextcord.ui.Select):
         )
         self.bot = bot
 
-    async def callback(self, interaction: nextcord.Interaction):
+    async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
         guild = interaction.guild
@@ -140,7 +141,7 @@ class SetupSelect(nextcord.ui.Select):
                 )
                 self.bot.connection.commit()
 
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title=cfg["title"],
                     description=cfg["description"],
                     color=0x2a2a2a,
@@ -160,7 +161,7 @@ class SetupSelect(nextcord.ui.Select):
 
         cursor.close()
 
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Ryujin Setup Complete",
             color=0x2a2a2a,
         )
@@ -177,7 +178,7 @@ class SetupSelect(nextcord.ui.Select):
 
     async def _get_or_create_category(self, guild):
         category_name = "Ryujin"
-        existing = nextcord.utils.get(guild.categories, name=category_name)
+        existing = discord.utils.get(guild.categories, name=category_name)
         if existing:
             return existing
         return await guild.create_category(
@@ -187,12 +188,12 @@ class SetupSelect(nextcord.ui.Select):
 
     def _build_overwrites(self, guild):
         overwrites = {
-            guild.default_role: nextcord.PermissionOverwrite(
+            guild.default_role: discord.PermissionOverwrite(
                 send_messages=True,
                 view_channel=True,
                 attach_files=True,
             ),
-            guild.me: nextcord.PermissionOverwrite(
+            guild.me: discord.PermissionOverwrite(
                 send_messages=True,
                 view_channel=True,
                 manage_messages=True,
@@ -203,7 +204,7 @@ class SetupSelect(nextcord.ui.Select):
         return overwrites
 
 
-class SetupView(nextcord.ui.View):
+class SetupView(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=300)
         self.add_item(SetupSelect(bot))
@@ -213,19 +214,19 @@ class SetupCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(name="setup", description="Quick setup: auto-create Ryujin system channels")
-    async def setup(self, interaction: nextcord.Interaction):
+    @app_commands.command(name="setup", description="Quick setup: auto-create Ryujin system channels")
+    async def setup(self, interaction: discord.Interaction):
         if not (interaction.user.id == 977190163736322088 or
                 interaction.user == interaction.guild.owner or
                 interaction.user.guild_permissions.administrator):
-            await interaction.send("Only the server owner or administrators can use this command.", ephemeral=True)
+            await interaction.response.send_message("Only the server owner or administrators can use this command.", ephemeral=True)
             return
 
         if not self.bot.connection:
-            await interaction.send("Database connection is not available. Setup cannot proceed.", ephemeral=True)
+            await interaction.response.send_message("Database connection is not available. Setup cannot proceed.", ephemeral=True)
             return
 
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="Ryujin Setup",
             description="Select which features you want to set up. Channels will be auto-created in a **Ryujin** category.\n\nFeatures already configured will be skipped.",
             color=0x2a2a2a,
@@ -234,8 +235,8 @@ class SetupCog(RyujinCog):
         embed.set_author(name="Ryujin", icon_url=RYUJIN_LOGO)
 
         view = SetupView(self.bot)
-        await interaction.send(embed=embed, view=view, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
-def setup(bot):
-    bot.add_cog(SetupCog(bot))
+async def setup(bot):
+    await bot.add_cog(SetupCog(bot))

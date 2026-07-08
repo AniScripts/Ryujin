@@ -1,38 +1,21 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from mysql.connector import Error
 from cogs.utils.base import RyujinCog
 
 class ManageSystemCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(
+    @app_commands.command(
         name="managesystem",
         description="Setup, change, or remove a system channel.",
     )
     async def system(
         self,
-        interaction: nextcord.Interaction, 
-        system: str = nextcord.SlashOption(
-            choices=[
-                "Remove Background",
-                "Anime Search",
-                "Font Search",
-                "Song Search",
-                "TikTok Downloader", 
-                "TikTok Audio Downloader",
-                "YouTube Video Downloader",
-                "YouTube Audio Downloader",
-                "Instagram Downloader",
-                "Ryujin AI"
-            ],
-            description="Choose which system to configure"
-        ),
-        action: str = nextcord.SlashOption(
-            choices=["setup", "change", "remove"],
-            description="Choose what action to take"
-        )
-    ):
+        interaction: discord.Interaction, 
+        system: str,
+        action: str):
         SYSTEM_CONFIG = {
             "Remove Background": {
                 "table": "removebg",
@@ -93,7 +76,7 @@ class ManageSystemCog(RyujinCog):
         if not (interaction.user.id == 977190163736322088 or 
                 interaction.user == interaction.guild.owner or 
                 interaction.user.guild_permissions.administrator):
-            await interaction.send(
+            await interaction.response.send_message(
                 f"Only the server owner or administrators can manage the `{system}` channel.",
                 ephemeral=True
             )
@@ -111,7 +94,7 @@ class ManageSystemCog(RyujinCog):
             existing_channel = cursor.fetchone()
 
             if existing_channel and action == "setup":
-                await interaction.send(
+                await interaction.response.send_message(
                     f"This server already has a `{system}` channel set. You can only have one channel for this function!",
                     ephemeral=True
                 )
@@ -134,7 +117,7 @@ class ManageSystemCog(RyujinCog):
             if action == "setup":
                 system_channel = interaction.guild.get_channel(int(channel_id))
                 if system_channel:
-                    embed = nextcord.Embed(
+                    embed = discord.Embed(
                         title=config["title"],
                         description=config["description"],
                         color=0x2a2a2a
@@ -147,7 +130,7 @@ class ManageSystemCog(RyujinCog):
                     message = await system_channel.send(embed=embed)
                     await message.pin()
 
-            await interaction.send(
+            await interaction.response.send_message(
                 f"The `{system}` channel has been {'set' if action == 'setup' else 'updated'} in this channel.",
                 ephemeral=True
             )
@@ -159,12 +142,12 @@ class ManageSystemCog(RyujinCog):
             if existing_channel:
                 cursor.execute(f"DELETE FROM {table} WHERE server_id = %s", (server_id,))
                 self.bot.connection.commit()
-                await interaction.send(
+                await interaction.response.send_message(
                     f"The `{system}` channel configuration has been removed from this server.",
                     ephemeral=True
                 )
             else:
-                await interaction.send(
+                await interaction.response.send_message(
                     f"There is no `{system}` channel set in this server.",
                     ephemeral=True
                 )
@@ -172,5 +155,5 @@ class ManageSystemCog(RyujinCog):
         cursor.close()
         await self.bot.maybe_send_ad(interaction)
 
-def setup(bot):
-    bot.add_cog(ManageSystemCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(ManageSystemCog(bot)) 

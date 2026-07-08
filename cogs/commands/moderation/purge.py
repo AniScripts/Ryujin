@@ -1,24 +1,20 @@
-import nextcord
-from nextcord.ext import commands
-from nextcord import SlashOption
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.base import RyujinCog
 
 class PurgeCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="purge",
-        description="Delete a certain number of messages from a channel."
+        description="Bulk delete messages from a channel",
     )
     async def purge(
         self,
-        interaction: nextcord.Interaction,
-        messages: int = SlashOption(
-            name="messages",
-            description="The number of messages to delete (max 100).",
-            required=True
-        )
+        interaction: discord.Interaction,
+        messages: int,
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -26,17 +22,17 @@ class PurgeCog(RyujinCog):
         await interaction.response.defer(ephemeral=True)
 
         if not interaction.user.guild_permissions.manage_messages:
-            return await interaction.send("❌ You don't have permission to use this command.", ephemeral=True)
+            return await interaction.response.send_message("❌ You don't have permission to use this command.", ephemeral=True)
 
         if messages < 1 or messages > 100:
-            return await interaction.send("❌ You must specify between 1 and 100 messages.", ephemeral=True)
+            return await interaction.response.send_message("❌ You must specify between 1 and 100 messages.", ephemeral=True)
 
         try:
             deleted = await interaction.channel.purge(limit=messages)
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="🧹 Messages Purged",
                 description=f"Successfully deleted `{len(deleted)}` messages from {interaction.channel.mention}.",
-                color=nextcord.Color.red()
+                color=discord.Color.red()
             )
             embed.set_footer(
                 text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.logo)
@@ -53,10 +49,10 @@ class PurgeCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
-            await interaction.send(f"❌ Failed to purge messages: `{e}`", ephemeral=True)
+            await interaction.response.send_message(f"❌ Failed to purge messages: `{e}`", ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(PurgeCog(bot))
+async def setup(bot):
+    await bot.add_cog(PurgeCog(bot))

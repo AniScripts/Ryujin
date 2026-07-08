@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 import re
 
@@ -13,19 +14,14 @@ class ConvertCog(RyujinCog):
     def sanitize_filename(self, filename):
         return re.sub(r'[<>:"/\\|?*]', '', filename)
 
-    @nextcord.slash_command(name="convert", description="Convert a file from one format to another.")
+    @app_commands.command(name="convert", description="Convert a file from one format to another.")
+    @app_commands.describe(from_format="Source format", to_format="Target format")
     async def convert(
         self,
-        interaction: nextcord.Interaction,
-        from_format: str = nextcord.SlashOption(
-            choices=["MP4", "MKV", "MOV", "AVI", "MP3", "WAV", "M4A", "PNG", "JPG", "JPEG", "SVG", "WEBP", "ICO"],
-            description="Source format",
-        ),
-        to_format: str = nextcord.SlashOption(
-            choices=["MP4", "MKV", "MOV", "AVI", "MP3", "WAV", "M4A", "PNG", "JPG", "JPEG", "SVG", "WEBP", "ICO"],
-            description="Target format",
-        ),
-        file: nextcord.Attachment = nextcord.SlashOption(description="File to convert", required=True),
+        interaction: discord.Interaction,
+        from_format: str,
+        to_format: str,
+        file: discord.Attachment ,
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -41,7 +37,7 @@ class ConvertCog(RyujinCog):
 
             await convert_media(input_path, output_path, from_format, to_format)
 
-            await interaction.followup.send(file=nextcord.File(output_path), ephemeral=True)
+            await interaction.followup.send(file=discord.File(output_path), ephemeral=True)
             await self.bot.maybe_send_ad(interaction)
         except Exception as e:
             await interaction.followup.send(f"An error occurred: {e}", ephemeral=True)
@@ -54,5 +50,5 @@ class ConvertCog(RyujinCog):
                     pass
 
 
-def setup(bot):
-    bot.add_cog(ConvertCog(bot))
+async def setup(bot):
+    await bot.add_cog(ConvertCog(bot))

@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.db import remove_warning, get_user_warnings, get_warning_count
 from cogs.utils.base import RyujinCog
 
@@ -7,49 +8,36 @@ class RemoveWarnCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="remove_warn",
         description="Remove a specific warning from a member.",
-        default_member_permissions=nextcord.Permissions(manage_messages=True)
+        default_member_permissions=discord.Permissions(manage_messages=True)
     )
     async def remove_warn(
         self,
-        interaction: nextcord.Interaction,
-        warn_number: int = nextcord.SlashOption(
-            name="warn_number",
-            description="The warning ID number to remove",
-            required=True
-        ),
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="The user to remove the warning from",
-            required=True
-        ),
-        reason: str = nextcord.SlashOption(
-            name="reason",
-            description="Reason for removing the warning",
-            required=False
-        )
-    ):
+        interaction: discord.Interaction,
+        warn_number: int,
+        user: discord.Member ,
+        reason: str):
         if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_messages:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You don't have permission to remove warnings.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.user.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't remove warnings from this user due to role hierarchy.",
                 ephemeral=True
             )
             return
 
         if warn_number <= 0:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ Warning number must be a positive integer.",
                 ephemeral=True
             )
@@ -65,7 +53,7 @@ class RemoveWarnCog(RyujinCog):
             warning_exists = any(warning[0] == warn_number for warning in user_warnings)
             
             if not warning_exists:
-                await interaction.send(
+                await interaction.response.send_message(
                     f"❌ Warning #{warn_number} not found for {user.mention}.",
                     ephemeral=True
                 )
@@ -81,7 +69,7 @@ class RemoveWarnCog(RyujinCog):
             )
 
             if not success:
-                await interaction.send(
+                await interaction.response.send_message(
                     "❌ Failed to remove warning from database.",
                     ephemeral=True
                 )
@@ -93,14 +81,14 @@ class RemoveWarnCog(RyujinCog):
                 user.id
             )
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="✅ Warning Removed",
                 description=f"Warning #{warn_number} has been removed from **{user.mention}**.\n\n"
                           f"**User:** {user.mention} ({user.name})\n"
                           f"**Removed by:** {interaction.user.mention} ({interaction.user.name})\n"
                           f"**Reason:** {remove_reason}\n"
                           f"**Remaining Warnings:** {total_warnings}",
-                color=nextcord.Color.green()
+                color=discord.Color.green()
             )
             
             embed.set_footer(
@@ -114,13 +102,13 @@ class RemoveWarnCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:
-            await interaction.send(
+            await interaction.response.send_message(
                 f"❌ An error occurred while removing the warning: `{e}`",
                 ephemeral=True
             )
 
-def setup(bot):
-    bot.add_cog(RemoveWarnCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(RemoveWarnCog(bot)) 

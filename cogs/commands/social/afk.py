@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from datetime import datetime
 import json
 import os
@@ -26,18 +27,14 @@ class AfkCog(RyujinCog):
             json.dump(self.afk_users, f, indent=4)
 
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="afk",
-        description="Set yourself as AFK (Away From Keyboard)."
+        description="Set AFK status",
     )
     async def afk(
         self, 
-        interaction: nextcord.Interaction, 
-        reason: str = nextcord.SlashOption(
-            description="Reason for being AFK (optional)",
-            required=False,
-            default="No reason provided"
-        )
+        interaction: discord.Interaction, 
+        reason: str = None,
     ):
         """Set AFK status"""
         if await self.blacklist_guard(interaction):
@@ -51,7 +48,7 @@ class AfkCog(RyujinCog):
         }
         self.save_afk_data()
 
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="🟡 AFK Status Set",
             description=f"You are now **AFK**\n\n📝 **Reason:** {reason}\n⏰ **Set at:** {current_time}",
             color=0xFFD700
@@ -66,7 +63,7 @@ class AfkCog(RyujinCog):
         )
 
         await self.bot.maybe_send_ad(interaction)
-        await interaction.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
     @commands.Cog.listener()
     async def on_message(self, message):
         """Handle AFK removal when user sends a message"""
@@ -80,7 +77,7 @@ class AfkCog(RyujinCog):
             del self.afk_users[user_id]
             self.save_afk_data()
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="🟢 Welcome Back!",
                 description=f"Your AFK status has been removed.\n\n⏰ **You were AFK for:** {afk_data['reason']}",
                 color=0x00FF00
@@ -101,7 +98,7 @@ class AfkCog(RyujinCog):
             if mentioned_user_id in self.afk_users:
                 afk_data = self.afk_users[mentioned_user_id]
                 
-                embed = nextcord.Embed(
+                embed = discord.Embed(
                     title="🟡 User is AFK",
                     description=f"{mention.mention} is currently **AFK**\n\n📝 **Reason:** {afk_data['reason']}\n⏰ **Since:** {afk_data['timestamp']}",
                     color=0xFFD700
@@ -116,11 +113,11 @@ class AfkCog(RyujinCog):
                 )
 
                 await message.channel.send(embed=embed, delete_after=15)
-    @nextcord.slash_command(
+    @app_commands.command(
         name="afk_list",
-        description="Show all AFK users in the current server."
+        description="Show all AFK users in the server",
     )
-    async def afk_list(self, interaction: nextcord.Interaction):
+    async def afk_list(self, interaction: discord.Interaction):
         """Show AFK users list"""
         if await self.blacklist_guard(interaction):
             return
@@ -140,9 +137,8 @@ class AfkCog(RyujinCog):
                     continue
 
         if not afk_users_in_guild:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="📋 AFK Users",
-                description="No users are currently AFK in this server.",
                 color=0x2a2a2a
             )
         else:
@@ -152,7 +148,7 @@ class AfkCog(RyujinCog):
                 data = afk_user["data"]
                 description += f"👤 **{user.display_name}**\n📝 {data['reason']}\n⏰ {data['timestamp']}\n\n"
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="📋 AFK Users",
                 description=description,
                 color=0x2a2a2a
@@ -164,7 +160,7 @@ class AfkCog(RyujinCog):
         )
 
         await self.bot.maybe_send_ad(interaction)
-        await interaction.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(AfkCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(AfkCog(bot)) 

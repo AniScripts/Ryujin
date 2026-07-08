@@ -1,23 +1,24 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from cogs.utils.base import RyujinCog
 
 class DisableAdsCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="disableads",
         description="Disable promotional messages in this server",
     )
-    async def disableads(self, interaction: nextcord.Interaction):
+    async def disableads(self, interaction: discord.Interaction):
         if await self.blacklist_guard(interaction):
             return
 
         if not (interaction.user.id == 977190163736322088 or 
                 interaction.user == interaction.guild.owner or 
                 interaction.user.guild_permissions.administrator):
-            await interaction.send(
+            await interaction.response.send_message(
                 "Only the server owner or administrators can disable ads.",
                 ephemeral=True
             )
@@ -28,7 +29,7 @@ class DisableAdsCog(RyujinCog):
         result = cursor.fetchone()
         
         if result:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="Already Disabled",
                 description="Promotional messages are already disabled in this server!",
                 color=0x2a2a2a
@@ -37,7 +38,7 @@ class DisableAdsCog(RyujinCog):
             cursor.execute("INSERT INTO disableads_servers (server_id) VALUES (%s)", (interaction.guild.id,))
             self.bot.connection.commit()
             
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="Ads Disabled", 
                 description="Promotional messages have been disabled for this server!",
                 color=0x2a2a2a
@@ -53,7 +54,7 @@ class DisableAdsCog(RyujinCog):
             icon_url=self.logo
         )
         await self.bot.maybe_send_ad(interaction)
-        await interaction.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(DisableAdsCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(DisableAdsCog(bot)) 

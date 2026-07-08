@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import time
 import platform
 import psutil
@@ -30,13 +31,13 @@ class PingCog(RyujinCog):
             return "🟠 Fair"
         else:
             return "🔴 Poor"
-    @nextcord.slash_command(
+    @app_commands.command(
         name="ping",
         description="Check bot latency and response time! 🏓"
     )
     async def ping(
         self,
-        interaction: nextcord.Interaction
+        interaction: discord.Interaction
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -56,7 +57,7 @@ class PingCog(RyujinCog):
         color = self.get_latency_color(bot_latency)
         status = self.get_latency_status(bot_latency)
         
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="🏓 **Pong!**",
             description="Here's my current latency and system status!",
             color=color
@@ -88,7 +89,7 @@ class PingCog(RyujinCog):
         
         embed.add_field(
             name="🤖 Bot Info",
-            value=f"**Python:** {platform.python_version()}\n**Nextcord:** {nextcord.__version__}\n**Servers:** {len(self.bot.guilds)}",
+            value=f"**Python:** {platform.python_version()}\n**Nextcord:** {discord.__version__}\n**Servers:** {len(self.bot.guilds)}",
             inline=True
         )
         
@@ -125,18 +126,18 @@ class PingCog(RyujinCog):
         await interaction.edit_original_message(content=None, embed=embed)
         
         await self.bot.maybe_send_ad(interaction)
-    @nextcord.slash_command(
+    @app_commands.command(
         name="pong",
         description="Respond with ping! 🏓"
     )
     async def pong(
         self,
-        interaction: nextcord.Interaction
+        interaction: discord.Interaction
     ):
         if await self.blacklist_guard(interaction):
             return
 
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="🏓 **Ping!**",
             description="You said pong, so I say ping!",
             color=0x2a2a2a
@@ -172,13 +173,13 @@ class PingCog(RyujinCog):
         await interaction.response.send_message(embed=embed)
         
         await self.bot.maybe_send_ad(interaction)
-    @nextcord.slash_command(
+    @app_commands.command(
         name="latency",
         description="Get detailed latency information! 📊"
     )
     async def latency(
         self,
-        interaction: nextcord.Interaction
+        interaction: discord.Interaction
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -205,7 +206,7 @@ class PingCog(RyujinCog):
         color = self.get_latency_color(bot_latency)
         status = self.get_latency_status(bot_latency)
         
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             title="📊 **Detailed Latency Report**",
             description="Comprehensive system and network information",
             color=color
@@ -231,7 +232,7 @@ class PingCog(RyujinCog):
         
         embed.add_field(
             name="🔧 Technical Info",
-            value=f"**Python:** {platform.python_version()}\n**Nextcord:** {nextcord.__version__}\n**Platform:** {platform.system()} {platform.release()}",
+            value=f"**Python:** {platform.python_version()}\n**Nextcord:** {discord.__version__}\n**Platform:** {platform.system()} {platform.release()}",
             inline=True
         )
         
@@ -269,5 +270,5 @@ class PingCog(RyujinCog):
         
         await self.bot.maybe_send_ad(interaction)
 
-def setup(bot):
-    bot.add_cog(PingCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(PingCog(bot)) 

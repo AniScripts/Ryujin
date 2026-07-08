@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 
 from services.media import compress_video, compress_audio, compress_image, compress_pdf, compress_archive
@@ -9,8 +10,8 @@ from cogs.utils.base import RyujinCog
 class CompressFileCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(name="compress_file", description="Compress a file to reduce its size while maintaining quality")
-    async def compress_file(self, interaction: nextcord.Interaction, file: nextcord.Attachment):
+    @app_commands.command(name="compress_file", description="Compress a file to reduce its size while maintaining quality")
+    async def compress_file(self, interaction: discord.Interaction, file: discord.Attachment):
         if await self.blacklist_guard(interaction):
             return
 
@@ -46,7 +47,7 @@ class CompressFileCog(RyujinCog):
                 f"Original: {original_size/1024/1024:.2f} MB\n"
                 f"Compressed: {compressed_size/1024/1024:.2f} MB\n"
                 f"Reduction: {reduction:.1f}%",
-                file=nextcord.File(output_path),
+                file=discord.File(output_path),
                 ephemeral=True,
             )
             await self.bot.maybe_send_ad(interaction)
@@ -61,5 +62,5 @@ class CompressFileCog(RyujinCog):
                     pass
 
 
-def setup(bot):
-    bot.add_cog(CompressFileCog(bot))
+async def setup(bot):
+    await bot.add_cog(CompressFileCog(bot))

@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 import re
 
@@ -10,13 +11,13 @@ from cogs.utils.base import RyujinCog
 class CutAudioCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(name="cut_audio", description="Cut an audio file to a specific duration")
+    @app_commands.command(name="cut_audio", description="Cut an audio file to a specific duration")
     async def cut_audio(
         self,
-        interaction: nextcord.Interaction,
-        audio: nextcord.Attachment,
-        start_time: str = nextcord.SlashOption(description="Start time (format: 0:00)", required=True),
-        end_time: str = nextcord.SlashOption(description="End time (format: 0:00)", required=True),
+        interaction: discord.Interaction,
+        audio: discord.Attachment,
+        start_time: str,
+        end_time: str,
     ):
         if await self.blacklist_guard(interaction):
             return
@@ -57,7 +58,7 @@ class CutAudioCog(RyujinCog):
                 f"Duration: {result['duration']} seconds\n"
                 f"Original size: {result['original_size']/1024/1024:.2f} MB\n"
                 f"Cut size: {result['cut_size']/1024/1024:.2f} MB",
-                file=nextcord.File(output_path),
+                file=discord.File(output_path),
                 ephemeral=True,
             )
             await self.bot.maybe_send_ad(interaction)
@@ -72,5 +73,5 @@ class CutAudioCog(RyujinCog):
                     pass
 
 
-def setup(bot):
-    bot.add_cog(CutAudioCog(bot))
+async def setup(bot):
+    await bot.add_cog(CutAudioCog(bot))

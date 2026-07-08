@@ -1,11 +1,11 @@
-import nextcord
+import discord
 from datetime import datetime
 
 RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
 
 def create_info_embed(bot):
     """Creates a consistent info embed for both the info command and channel"""
-    info = nextcord.Embed(
+    info = discord.Embed(
         title="About Ryujin Bot",
         description="Your ultimate editing companion!",
         color=0x2a2a2a
@@ -54,7 +54,7 @@ def create_info_embed(bot):
 
 def create_ads_embed():
     """Creates the promotional embed with support buttons"""
-    embed = nextcord.Embed(
+    embed = discord.Embed(
         title="Support Ryujin Bot",
         description="Help us keep Ryujin Bot running and get exclusive features! 🌟",
         color=0x2a2a2a
@@ -92,7 +92,7 @@ def create_ads_embed():
 
 def create_servers_embed(guilds, page=0, total_pages=1):
     """Creates a servers list embed"""
-    embed = nextcord.Embed(title="Ryujin Servers", color=0x2a2a2a)
+    embed = discord.Embed(title="Ryujin Servers", color=0x2a2a2a)
     
     description = ""
     for guild in guilds:
@@ -113,17 +113,17 @@ def create_servers_embed(guilds, page=0, total_pages=1):
     
     return embed
 
-class SupportButtons(nextcord.ui.View):
+class SupportButtons(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
         
-        self.add_item(nextcord.ui.Button(
-            style=nextcord.ButtonStyle.gray,
+        self.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.gray,
             label="Support Server",
             url="https://discord.gg/FSjRSaJ4bt"
         ))
-        self.add_item(nextcord.ui.Button(
-            style=nextcord.ButtonStyle.gray,
+        self.add_item(discord.ui.Button(
+            style=discord.ButtonStyle.gray,
             label="Support Project",
             url="https://ko-fi.com/ryujinsupport"
         )) 

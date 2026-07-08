@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import json
 from cogs.utils.base import RyujinCog
 
@@ -7,11 +8,11 @@ class TrendingCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
 
-    @nextcord.slash_command(
+    @app_commands.command(
         name="trending",
         description="See what's trending in AMV Community!"
     )
-    async def trending(self, interaction: nextcord.Interaction):
+    async def trending(self, interaction: discord.Interaction):
         if await self.blacklist_guard(interaction):
             return
 
@@ -31,7 +32,7 @@ class TrendingCog(RyujinCog):
             for anime in trending_data["Animes"]:
                 description += f"» **{anime['name']}**\n"
             
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="📈 AMV Community Trends",
                 description=description,
                 color=0x2a2a2a
@@ -47,14 +48,14 @@ class TrendingCog(RyujinCog):
                 icon_url=self.logo
             )
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         except Exception as e:
-            error_embed = nextcord.Embed(
+            error_embed = discord.Embed(
                 title="❌ Error",
                 description="Could not fetch trending data. Please try again later.",
-                color=nextcord.Color.red()
+                color=discord.Color.red()
             )
-            await interaction.send(embed=error_embed, ephemeral=True)
+            await interaction.response.send_message(embed=error_embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(TrendingCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(TrendingCog(bot)) 

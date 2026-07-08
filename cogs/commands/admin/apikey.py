@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 import requests
 from mysql.connector import Error
 from cogs.utils.base import RyujinCog
@@ -7,28 +8,18 @@ from cogs.utils.base import RyujinCog
 class ApiKeyCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-    @nextcord.slash_command(
+    @app_commands.command(
         name="apikey",
         description="Manage API keys for the Remove Background feature",
         guild_ids=[1060144274722787328]
     )
     async def apikey(
         self,
-        interaction: nextcord.Interaction,
-        action: str = nextcord.SlashOption(
-            name="action",
-            description="Action to perform",
-            choices={"Add": "add", "Remove": "remove", "List": "list", "Test": "test"},
-            required=True
-        ),
-        api_key: str = nextcord.SlashOption(
-            name="api_key",
-            description="API key to add/remove",
-            required=False
-        )
-    ):
+        interaction: discord.Interaction,
+        action: str,
+        api_key: str):
         if interaction.user.id not in [977190163736322088, 1286323016061685779]:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="Error",
                 description="You don't have permission to use this command.",
                 color=0xff0000
@@ -105,7 +96,7 @@ class ApiKeyCog(RyujinCog):
             
             cursor.close()
 
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="API Key Management",
                 description=description,
                 color=0x2a2a2a
@@ -121,7 +112,7 @@ class ApiKeyCog(RyujinCog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
             
         except ValueError as ve:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="Error", 
                 description=str(ve),
                 color=0xff0000
@@ -137,7 +128,7 @@ class ApiKeyCog(RyujinCog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
             
         except Error as e:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="Error",
                 description=f"Database error: {str(e)}",
                 color=0xff0000
@@ -152,5 +143,5 @@ class ApiKeyCog(RyujinCog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-def setup(bot):
-    bot.add_cog(ApiKeyCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(ApiKeyCog(bot)) 

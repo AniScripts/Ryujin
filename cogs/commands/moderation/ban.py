@@ -1,5 +1,6 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
+from discord import app_commands
 from datetime import datetime, timedelta
 from cogs.utils.base import RyujinCog
 
@@ -34,56 +35,43 @@ class BanCog(RyujinCog):
                 return timedelta(hours=hours)
         except ValueError:
             return None
-    @nextcord.slash_command(
+    @app_commands.command(
         name="ban",
         description="Ban a member from the server with optional duration and reason.",
-        default_member_permissions=nextcord.Permissions(ban_members=True)
+        default_member_permissions=discord.Permissions(ban_members=True)
     )
     async def ban(
         self,
-        interaction: nextcord.Interaction,
-        user: nextcord.Member = nextcord.SlashOption(
-            name="user",
-            description="The user to ban",
-            required=True
-        ),
-        duration: str = nextcord.SlashOption(
-            name="duration",
-            description="Ban duration (e.g., 1d, 2h, 30m, permanent)",
-            required=False
-        ),
-        reason: str = nextcord.SlashOption(
-            name="reason",
-            description="Reason for the ban",
-            required=False
-        )
-    ):
+        interaction: discord.Interaction,
+        user: discord.Member ,
+        duration: str,
+        reason: str):
         if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.ban_members:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You don't have permission to use this command.",
                 ephemeral=True
             )
             return
 
         if not interaction.guild.me.guild_permissions.ban_members:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ I don't have permission to use this command.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.user.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ You can't use this command due to role hierarchy.",
                 ephemeral=True
             )
             return
 
         if user.top_role >= interaction.guild.me.top_role:
-            await interaction.send(
+            await interaction.response.send_message(
                 "❌ I can't ban this user due to role hierarchy.",
                 ephemeral=True
             )
@@ -98,10 +86,10 @@ class BanCog(RyujinCog):
 
         try:
             try:
-                dm_embed = nextcord.Embed(
+                dm_embed = discord.Embed(
                     title="🔨 You have been banned",
                     description=f"You have been banned from **{interaction.guild.name}**\n\nReason: {ban_reason}\nBanned by: {interaction.user.mention} ({interaction.user.name})\nDuration: {duration if not is_permanent and duration_delta else 'Permanent'}",
-                    color=nextcord.Color.red()
+                    color=discord.Color.red()
                 )
                 
                 dm_embed.set_footer(
@@ -116,10 +104,10 @@ class BanCog(RyujinCog):
 
             await user.ban(reason=f"{interaction.user.name}: {ban_reason}")
             
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title="🔨 User Banned",
                 description=f"**{user.mention}** has been banned from the server.\n\nUser: {user.mention} ({user.name})\nBanned by: {interaction.user.mention} ({interaction.user.name})\nReason: {ban_reason}\nDuration: {duration if not is_permanent and duration_delta else 'Permanent'}\n{f'Expires: <t:{int((datetime.now() + duration_delta).timestamp())}:R>' if not is_permanent and duration_delta else ''}\nDM Status: {'✅ DM sent to user' if dm_sent else '❌ Could not send DM (DMs closed)'}",
-                color=nextcord.Color.red()
+                color=discord.Color.red()
             )
             
             embed.set_footer(
@@ -133,18 +121,18 @@ class BanCog(RyujinCog):
             )
 
             await self.bot.maybe_send_ad(interaction)
-            await interaction.send(embed=embed, ephemeral=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
-        except nextcord.Forbidden:
-            await interaction.send(
+        except discord.Forbidden:
+            await interaction.response.send_message(
                 "❌ I don't have permission to ban this user.",
                 ephemeral=True
             )
         except Exception as e:
-            await interaction.send(
+            await interaction.response.send_message(
                 f"❌ An error occurred while banning the user: `{e}`",
                 ephemeral=True
             )
 
-def setup(bot):
-    bot.add_cog(BanCog(bot)) 
+async def setup(bot):
+    await bot.add_cog(BanCog(bot)) 

@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import os
 import json
 import platform
@@ -47,7 +47,7 @@ else:
 TOKEN = os.getenv("RYUJIN_TOKEN", "your_bot_token_here")
 WELCOME_LEAVE_CHANNEL = os.getenv("WELCOME_LEAVE_CHANNEL_ID", "0")
 
-intents = nextcord.Intents.default()
+intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="+", intents=intents)
 
@@ -67,20 +67,13 @@ async def on_ready():
     print("=" * 100 + "\n")
 
     print(f"Connected as {bot.user.name} (ID: {bot.user.id})")
-    print(f"Running Python {platform.python_version()} | Nextcord {nextcord.__version__}")
+    print(f"Running Python {platform.python_version()} | discord.py {discord.__version__}")
     print(f"OS: {platform.system()} {platform.release()}")
     print("\n" + "=" * 100 + "\n")
     print("Bot startup completed successfully!")
 
-    print("Syncing slash commands with Discord...")
-    try:
-        await bot.sync_all_application_commands()
-        print("Slash commands synced successfully!")
-    except Exception as e:
-        print(f"Failed to sync slash commands: {e}")
 
-
-def load_cogs():
+async def setup_hook():
     print("Starting cog loading process...")
 
     cog_dirs = ["cogs/commands", "cogs/events"]
@@ -94,7 +87,7 @@ def load_cogs():
                         extension_name = f"{base_dir.replace('/', '.')}.{folder}.{file[:-3]}"
                         try:
                             print(f"  Loading: {extension_name}")
-                            bot.load_extension(extension_name)
+                            await bot.load_extension(extension_name)
                             print(f"  Successfully loaded: {extension_name}")
                         except Exception as e:
                             print(f"  Failed to load: {extension_name}")
@@ -102,6 +95,13 @@ def load_cogs():
                             import traceback
                             traceback.print_exc()
 
+    print("Syncing slash commands with Discord...")
+    try:
+        await bot.tree.sync()
+        print("Slash commands synced successfully!")
+    except Exception as e:
+        print(f"Failed to sync slash commands: {e}")
 
-load_cogs()
+
+bot.setup_hook = setup_hook
 bot.run(TOKEN)
