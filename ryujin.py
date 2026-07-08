@@ -95,13 +95,7 @@ async def setup_hook():
                             import traceback
                             traceback.print_exc()
 
-    print("Syncing slash commands with Discord...")
-    try:
-        await bot.tree.sync()
-        print("Slash commands synced successfully!")
-    except Exception as e:
-        print(f"Failed to sync slash commands: {e}")
-
+    print("Cogs loaded successfully!")
 
 bot.setup_hook = setup_hook
 bot.run(TOKEN)
