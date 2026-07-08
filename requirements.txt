@@ -1,0 +1,17 @@
+nextcord>=2.6.0
+mysql-connector-python>=8.0.0
+yt-dlp>=2024.0.0
+pytube>=15.0.0
+tiktok-downloader>=1.0.0
+instaloader>=4.0.0
+shazamio>=0.5.0
+groq>=0.4.0
+aiohttp>=3.9.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+Pillow>=10.0.0
+psutil>=5.9.0
+colorama>=0.4.6
+nightcore>=1.0.0
+python-dotenv>=1.0.0
+
