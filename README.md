@@ -1,124 +1,265 @@
 <div align="center">
-  <a href="https://github.com/moongetsu">
-    <img src="https://cdn.moongetsu.ro/GitHub/GithubHeader00.png" alt="GithubHeader" width="100%" height="100%">
+  <a href="https://github.com/AniScripts">
+    <img src="https://cdn.moongetsu.ro/GitHub/GithubHeader00.png" width="100%" alt="AniScripts"/>
   </a>
-
-  <h1 align="center">🌕 Ryujin Discord Bot 🌕</h1>
-  <h3 align="center">A Discord Bot created for editing communities!</h3>
-
-  <p align="center">
-    <strong>Elevate your creative journey with the most sophisticated Discord bot for AMV Communities.</strong>
-    <br/>
-    <em>Experience seamless editing with our intuitive Discord Bot, designed for AMV creators.</em>
-  </p>
-
-  <p align="center">
-    <a href="#features">✨ Features</a> •
-    <a href="#commands">🎯 Commands</a> •
-    <a href="#setup">⚡ Setup</a> •
-    <a href="#support">💫 Support</a>
-  </p>
 </div>
 
-## ✨ Core Features
+<h1 align="center">Ryujin</h1>
+<p align="center">
+  <b>The all-in-one Discord bot for AMV editors and content creators.</b><br>
+  <i>Download footage, process media, discover assets, and manage your editing community.</i>
+</p>
 
-- **Intelligent Media Processing**: Transform your media with precision and ease
-- **After Effects Support**: Seamless access to professional presets and tools
-- **Creative Community Hub**: Connect, share, and grow with fellow creators
-- **Premium Resource Collection**: Curated overlays, audio, and inspiration
-- **Social Media Downloader System Integration**: Easier downloads from social media with just one message
+<p align="center">
+  <a href="#-features">Features</a> ·
+  <a href="#-commands">Commands</a> ·
+  <a href="#-setup">Setup</a> ·
+  <a href="#-services">Architecture</a> ·
+  <a href="#-installation">Install</a>
+</p>
 
-## 🎯 Command Suite
+---
 
-### 🛡️ Moderation Commands (🆕)
+**Ryujin** is a purpose-built Discord bot for the AMV community: download source material from YouTube/TikTok/Instagram, process audio and video, discover anime sources and fonts, remove backgrounds, chat with an AI editing assistant, and manage your server.
+
+Built with a clean, modular architecture: command cogs, event listeners, and standalone services — easy to modify, extend, and deploy.
+
+> [!NOTE]
+> **Compatibility:** Python 3.10+ • nextcord 2.6+ • MySQL • FFmpeg required on host.
+
+---
+
+## 🚀 Features
+
+| Feature | What it does |
+| :-- | :-- |
+| **Media Downloaders** | YouTube video (up to 1080p) and audio, TikTok, Instagram — just paste a link. |
+| **Media Processing** | Nightcore, Sped Up, Slowed effects, audio cutting, format conversion, file compression, video resizing. |
+| **Asset Discovery** | Reverse anime search (trace.moe), song identification (Shazam), font recognition (WhatFontIs). |
+| **Remove Background** | One-image background removal via self-hosted API. |
+| **Ryujin AI** | AI editing assistant powered by Groq (Llama 3.3 70B). |
+| **Resource Library** | After Effects presets, project files, scripts, extensions, overlays, SFX, edit audios. |
+| **Social Tools** | Trending feed, hashtag generator, AFK status. |
+| **Moderation** | Purge, slowmode, lock, timeout, kick, ban, softban, warn system. |
+| **One-Click Setup** | `/setup` — select features, bot creates all channels and configures everything. |
+
+---
+
+## 🎯 Commands
+
+<details>
+<summary>📦 Resources</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/nick <nickname>` | Change the bot’s nickname |
-| `/setnick <user> <nickname>` | Change a user's nickname |
-| `/slowmode <seconds> [channel]` | Enable slowmode in a channel |
-| `/remove_slowmode <seconds> [channel]` | Disable slowmode in a channel |
-| `/lock [channel]` / `/unlock [channel]` | Restrict or allow messages in a channel |
-| `/purge <messages>` | Bulk delete messages from a channel |
-| `/timeout <user> <duration> [reason]` / `/remove_timeout <user> [reason]` | Temporarily mute/unmute a user |
-| `/kick <user> [reason]` | Kick a user with DM notification |
-| `/ban <user> [duration] [reason]` / `/unban <user_id> [reason]` | Ban or unban a user with DM notification |
-| `/softban <user> [duration] [reason]` | Softban (ban + unban to remove messages) |
-| `/warn <user> [reason]` / `/warns <user>` / `/remove_warn <user> <warning_id>` | Manage user warnings |
-| `/managesystem` | Configure system channels:<br>
-  - YouTube Downloader<br>
-  - Instagram Downloader<br>
-  - TikTok Downloader<br>
-  - AI Background Removal<br>
-  - Advanced Anime Search<br>
-  - Song Search |
+| :-- | :-- |
+| `/overlay` | Random edit overlay |
+| `/edit_audio <style>` | Random edit audio per category |
+| `/audios_categories` | List audio categories |
+| `/sfx <category>` | Random SFX |
+| `/sfx_categories` | List SFX categories |
+| `/random_edit` | Random edit link |
+| `/compress_file <file>` | Compress video/image/audio/PDF/archive |
+| `/resize_video <video> <w> <h>` | Resize video with aspect ratio padding |
 
-### 👥 Social & Community
+</details>
+
+<details>
+<summary>🎬 After Effects</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/trending` | Stay updated with latest trends |
-| `/generatetags` | Create optimized hashtags |
-| `/afk [status]` | Set AFK status (auto removed upon sending a message) |
-| `/afk_list` | Show all AFK users in the server |
+| :-- | :-- |
+| `/preset <category>` | Random .ffx preset |
+| `/presets_categories` | List preset categories |
+| `/projects_list` | List project files |
+| `/project_file <number>` | Download AEP + preview |
+| `/scripts_list` | List scripts |
+| `/script <number>` | Download script |
+| `/extensions_list` | List extensions |
+| `/extension <number>` | Download extension |
 
-### ℹ️ Information
+</details>
+
+<details>
+<summary>🎵 Media Processing</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/info` | Discover bot capabilities and insights |
-| `/help` | Access detailed command guides |
-| `/resources` | Explore premium editing resources |
-| `/bug` | Submit detailed issue reports |
-| `/donate` | Support and unlock exclusive features |
-| `/avatar [user]` | View/download user avatars |
-| `/server_info` | Get current server details |
-| `/whois [user]` | Get details about a user |
-| `/roleinfo <role>` | Get detailed role info |
-| `/roles` | List all roles in the server |
-| `/emojis` | List all custom emojis |
+| :-- | :-- |
+| `/nightcore <song>` | Pitch +2 semitones |
+| `/spedup <song>` | Pitch +1 semitone |
+| `/slowed <song>` | Pitch −1 semitone |
+| `/convert <from> <to> <file>` | Convert between 13 formats |
+| `/cut_audio <audio> <start> <end>` | Trim audio |
 
-### 🎨 Media Tools
+</details>
+
+<details>
+<summary>👥 Social</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/overlay` | Access overlay collection |
-| `/edit_audio <style>` | Find the perfect soundtrack |
-| `/audios_categories` | Explore our audio library |
-| `/random_edit` | Get inspired by curated edits |
-| `/compress_file <file>` | Optimize with quality preservation |
-| `/resize_video <video> <width> <height>` | Custom video dimensions |
+| :-- | :-- |
+| `/trending` | Trending anime and songs |
+| `/generatetags` | Hashtag generator modal |
+| `/afk [reason]` | Set AFK status |
+| `/afk_list` | List AFK users |
 
-### 🎬 After Effects
+</details>
+
+<details>
+<summary>🛡️ Moderation</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/preset <type>` | Access professional presets |
-| `/presets_categories` | Browse preset collections |
-| `/projects_list` | Explore project templates |
-| `/project_file <name>` | Download with documentation |
-| `/scripts_list` | Discover automation tools |
-| `/script <number>` | Get detailed installation guides |
-| `/extensions_list` | Browse powerful extensions |
-| `/extension <number>` | Download with setup guides |
+| :-- | :-- |
+| `/purge <count>` | Bulk delete messages |
+| `/slowmode <seconds>` / `/remove_slowmode` | Channel slowmode |
+| `/lock` / `/unlock` | Restrict channel |
+| `/timeout <user> <duration>` / `/remove_timeout <user>` | Timeout user |
+| `/kick <user> <reason>` | Kick with DM |
+| `/ban <user> [duration] [reason]` / `/unban <user_id>` | Ban/unban |
+| `/softban <user> [reason]` | Ban + instant unban |
+| `/warn <user> <reason>` / `/warns <user>` / `/remove_warn <id> <user>` | Warning system |
+| `/managesystem <system> <action>` | Individual system channel config |
 
-### 🎵 Media Processing
+</details>
+
+<details>
+<summary>ℹ️ Meta</summary>
+
 | Command | Description |
-|---------|-------------|
-| `/nightcore <song>` | Create custom nightcore versions |
-| `/spedup <song>` | Speed up with quality control |
-| `/slowed <song>` | Slow down with pitch correction |
-| `/convert <from_format> <to_format> <file>` | Seamless format conversion |
+| :-- | :-- |
+| `/info` | Bot information, bug report link, donation link |
+| `/help` | Full command guide |
+| `/ping` / `/pong` / `/latency` | Latency and system stats |
+| `/resources` | Resource counts |
+| `/bot_stats` | Detailed bot statistics |
 
-## 💫 Support & Growth
+</details>
 
-- **Found an issue?** Submit detailed reports
-- **Have ideas?** Share your vision with us
-- **Need assistance?** Join our [Support Server](https://discord.gg/VADaEna5XQ)
-- **Connect:** [moongetsu1](https://discord.com/users/977190163736322088)
+<details>
+<summary>🔧 Admin (owner/server-owner only)</summary>
 
-## 📜 License
+| Command | Description |
+| :-- | :-- |
+| `/setup` | One-click multi-feature channel creation |
+| `/disableads` | Toggle promotional messages |
+| `/blacklist` | Global user blacklist |
+| `/apikey` | Manage remove.bg API keys |
+| `/show_guilds` | List all bot guilds |
+| `/add_trending_anime` / `/add_trending_song` / `/remove_trending` | Manage trending feed |
 
-Licensed under MIT - see [LICENSE](LICENSE) for details.
+</details>
+
+---
+
+## ⚡ Setup
+
+> One command, no manual channel creation.
+
+| Step | Action |
+| :-- | :-- |
+| 1 | Invite the bot with **Manage Channels** permission. |
+| 2 | Run `/setup` in any channel. |
+| 3 | Select features from the dropdown. |
+| 4 | Bot creates a **Ryujin** category with configured channels. |
+
+Individual channels can be changed or removed later via `/managesystem`.
+
+**System channels** (user pastes content, bot processes automatically):
+
+| Channel | What to post |
+| :-- | :-- |
+| `#youtube-video-dl` | YouTube video links |
+| `#youtube-audio-dl` | YouTube links (audio only) |
+| `#tiktok-dl` | TikTok links |
+| `#instagram-dl` | Instagram post links |
+| `#remove-background` | Images (background removed automatically) |
+| `#anime-search` | Anime screenshots (source identification) |
+| `#song-search` | Audio files or YT/TikTok links (Shazam) |
+| `#font-search` | Font screenshots (font identification) |
+| `#ryujin-ai` | Any message (AI assistant responds) |
+
+---
+
+## 🏗️ Architecture
+
+```
+Ryujin/
+├── ryujin.py              # Entry point (~90 lines)
+├── cogs/
+│   ├── commands/           # 49 command cogs, all extend RyujinCog
+│   │   ├── admin/          # Owner-gated management
+│   │   ├── mediatools/     # Overlay, audio, SFX, compress, resize
+│   │   ├── meta/           # Info, help, ping, bot stats
+│   │   ├── moderation/     # Purge, ban, kick, warn, lock, setup
+│   │   ├── processing/     # Nightcore, spedup, slowed, convert, cut
+│   │   ├── resources/      # AE presets, projects, scripts, extensions
+│   │   └── social/         # Trending, hashtags, AFK
+│   ├── events/             # 5 on_message listeners
+│   │   ├── background.py   # Status rotation, guild join/leave
+│   │   ├── downloaders.py  # YT, TikTok, Instagram handlers
+│   │   ├── search.py       # Anime, song, font search handlers
+│   │   ├── removebg.py     # Background removal handler
+│   │   └── ai.py           # Groq AI chat handler
+│   └── utils/              # Shared: base, config, db, embeds, helpers, constants
+├── services/               # Standalone, no Discord dependency
+│   ├── youtube.py          # YT video + audio download
+│   ├── tiktok.py           # TikTok download
+│   ├── instagram.py        # Instagram download
+│   ├── ai.py               # Groq LLM chat completion
+│   ├── search.py           # trace.moe, Shazam, WhatFontIs
+│   ├── remove_bg.py        # Background removal API
+│   └── media.py            # FFmpeg/Pillow: pitch shift, convert, cut, compress, resize
+└── data/                   # Runtime JSON (auto-initialized)
+```
+
+---
+
+## 📦 Installation
+
+<details>
+<summary>1. Clone and install dependencies</summary>
+
+```bash
+git clone https://github.com/AniScripts/Ryujin.git
+cd Ryujin
+pip install -r requirements.txt
+```
+
+</details>
+
+<details>
+<summary>2. Configure environment</summary>
+
+```bash
+cp .env.example .env
+```
+
+Fill in your values:
+
+| Variable | Required | Description |
+| :-- | :-- | :-- |
+| `RYUJIN_TOKEN` | Yes | Discord bot token |
+| `GROQ_API_KEY` | Yes | Groq API key (for Ryujin AI) |
+| `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` | Yes | MySQL credentials |
+| `WELCOME_LEAVE_CHANNEL_ID` | No | Channel for join/leave logs |
+| `WHATFONTIS_API_KEY` | No | WhatFontIs API key (for font search) |
+| `REMOVEBG_API_URL` | No | Custom remove-bg API endpoint |
+
+</details>
+
+<details>
+<summary>3. Run</summary>
+
+```bash
+python ryujin.py
+```
+
+</details>
+
+> [!WARNING]
+> Requires **FFmpeg** installed and available on PATH. Media processing, downloads, and song search depend on it. Optional: **Ghostscript** for PDF compression, **7-Zip** for archive compression.
 
 ---
 
 <div align="center">
-  <sub>Created with 😍 by <a href="https://github.com/moongetsu">moongetsu</a></sub>
-  <br/>
+  <sub>Built with ❤️ by <a href="https://github.com/moongetsu">moongetsu</a> · <a href="https://discord.gg/FSjRSaJ4bt">Support Server</a></sub>
 </div>
