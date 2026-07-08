@@ -2,33 +2,11 @@ import nextcord
 from nextcord.ext import commands
 from nextcord import SlashOption
 from datetime import timedelta
+from cogs.utils.base import RyujinCog
 
-class TimeoutCog(commands.Cog):
+class TimeoutCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-        self.RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
-
-    def check_blacklist(self, user_id):
-        if hasattr(self.bot, 'blacklist') and user_id in self.bot.blacklist:
-            return True, self.bot.blacklist[user_id]
-        return False, None
-
-    def create_blacklist_embed(self, reason):
-        embed = nextcord.Embed(
-            title="You are blacklisted!",
-            description=f"**You can't use Ryujin's commands anymore because you have been blacklisted for `{reason}`.**",
-            color=nextcord.Color.red()
-        )
-        embed.set_footer(
-            text="© Ryujin Bot (2023-2025) | Blacklist System",
-            icon_url=self.RYUJIN_LOGO
-        )
-        
-        embed.set_author(
-            name="Ryujin",
-            icon_url=self.RYUJIN_LOGO
-        )
-        return embed
 
     @nextcord.slash_command(
         name="timeout",
@@ -42,12 +20,7 @@ class TimeoutCog(commands.Cog):
         duration: int = SlashOption(description="Duration in minutes"),
         reason: str = SlashOption(description="Reason for the timeout")
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.moderate_members:
@@ -66,14 +39,13 @@ class TimeoutCog(commands.Cog):
             )
             embed.set_footer(
                 text="© Ryujin Bot (2023-2025) | Moderation System",
-                icon_url=self.RYUJIN_LOGO
+                icon_url=self.logo
             )
             await self.bot.maybe_send_ad(interaction)
             await interaction.send(embed=embed)
 
         except Exception as e:
             await interaction.send(f"❌ Error: {e}", ephemeral=True)
-
     @nextcord.slash_command(
         name="remove_timeout",
         description="Remove timeout from a user.",
@@ -84,12 +56,7 @@ class TimeoutCog(commands.Cog):
         interaction: nextcord.Interaction,
         user: nextcord.Member = SlashOption(description="User to remove timeout")
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.moderate_members:
@@ -105,7 +72,7 @@ class TimeoutCog(commands.Cog):
             )
             embed.set_footer(
                 text="© Ryujin Bot (2023-2025) | Moderation System",
-                icon_url=self.RYUJIN_LOGO
+                icon_url=self.logo
             )
             await self.bot.maybe_send_ad(interaction)
             await interaction.send(embed=embed)

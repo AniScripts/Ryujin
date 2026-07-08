@@ -1,33 +1,11 @@
 import nextcord
 from nextcord.ext import commands
 from datetime import datetime, timedelta
+from cogs.utils.base import RyujinCog
 
-class BanCog(commands.Cog):
+class BanCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-        self.RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
-
-    def check_blacklist(self, user_id):
-        if hasattr(self.bot, 'blacklist') and user_id in self.bot.blacklist:
-            return True, self.bot.blacklist[user_id]
-        return False, None
-
-    def create_blacklist_embed(self, reason):
-        embed = nextcord.Embed(
-            title="You are blacklisted!",
-            description=f"**You can't use Ryujin's commands anymore because you have been blacklisted for `{reason}`.**",
-            color=nextcord.Color.red()
-        )
-        embed.set_footer(
-            text="© Ryujin Bot (2023-2025) | Blacklist System",
-            icon_url=self.RYUJIN_LOGO
-        )
-        
-        embed.set_author(
-            name="Ryujin",
-            icon_url=self.RYUJIN_LOGO
-        )
-        return embed
 
     def parse_duration(self, duration_str):
         """Parse duration string (e.g., '1d', '2h', '30m') and return timedelta"""
@@ -56,7 +34,6 @@ class BanCog(commands.Cog):
                 return timedelta(hours=hours)
         except ValueError:
             return None
-
     @nextcord.slash_command(
         name="ban",
         description="Ban a member from the server with optional duration and reason.",
@@ -81,12 +58,7 @@ class BanCog(commands.Cog):
             required=False
         )
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.ban_members:
@@ -134,7 +106,7 @@ class BanCog(commands.Cog):
                 
                 dm_embed.set_footer(
                     text="© Ryujin Bot (2023-2025) | Moderation System",
-                    icon_url=self.RYUJIN_LOGO
+                    icon_url=self.logo
                 )
                 
                 await user.send(embed=dm_embed)
@@ -152,12 +124,12 @@ class BanCog(commands.Cog):
             
             embed.set_footer(
                 text="© Ryujin Bot (2023-2025) | Moderation System",
-                icon_url=self.RYUJIN_LOGO
+                icon_url=self.logo
             )
             
             embed.set_author(
                 name="Ryujin",
-                icon_url=self.RYUJIN_LOGO
+                icon_url=self.logo
             )
 
             await self.bot.maybe_send_ad(interaction)

@@ -1,12 +1,11 @@
 import nextcord
 from nextcord.ext import commands
 from mysql.connector import Error
+from cogs.utils.base import RyujinCog
 
-class ManageSystemCog(commands.Cog):
+class ManageSystemCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-        self.RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
-
     @nextcord.slash_command(
         name="managesystem",
         description="Setup, change, or remove a system channel.",
@@ -143,7 +142,7 @@ class ManageSystemCog(commands.Cog):
                     embed.set_image(url=config["image_url"])
                     embed.set_footer(
                         text=f"© Ryujin Bot (2023-2025) | {config['title']} System",
-                        icon_url=self.RYUJIN_LOGO
+                        icon_url=self.logo
                     )
                     message = await system_channel.send(embed=embed)
                     await message.pin()

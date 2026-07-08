@@ -1,33 +1,11 @@
 import nextcord
 from nextcord.ext import commands
 from nextcord import SlashOption
+from cogs.utils.base import RyujinCog
 
-class SlowmodeCog(commands.Cog):
+class SlowmodeCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-        self.RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
-
-    def check_blacklist(self, user_id):
-        if hasattr(self.bot, 'blacklist') and user_id in self.bot.blacklist:
-            return True, self.bot.blacklist[user_id]
-        return False, None
-
-    def create_blacklist_embed(self, reason):
-        embed = nextcord.Embed(
-            title="You are blacklisted!",
-            description=f"**You can't use Ryujin's commands anymore because you have been blacklisted for `{reason}`.**",
-            color=nextcord.Color.red()
-        )
-        embed.set_footer(
-            text="© Ryujin Bot (2023-2025) | Blacklist System",
-            icon_url=self.RYUJIN_LOGO
-        )
-        
-        embed.set_author(
-            name="Ryujin",
-            icon_url=self.RYUJIN_LOGO
-        )
-        return embed
 
     @nextcord.slash_command(
         name="slowmode",
@@ -48,12 +26,7 @@ class SlowmodeCog(commands.Cog):
             required=False
         )
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_channels:
@@ -73,19 +46,18 @@ class SlowmodeCog(commands.Cog):
                 description=f"Slowmode in {target_channel.mention} is now set to `{seconds}` seconds.",
                 color=nextcord.Color.blurple()
             )
-            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.RYUJIN_LOGO)
+            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.logo)
 
             if interaction.guild.icon:
                 embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url)
             else:
-                embed.set_author(name="Ryujin", icon_url=self.RYUJIN_LOGO)
+                embed.set_author(name="Ryujin", icon_url=self.logo)
 
             await self.bot.maybe_send_ad(interaction)
             await interaction.send(embed=embed, ephemeral=True)
 
         except Exception as e:
             await interaction.send(f"❌ Failed to update slowmode: `{e}`", ephemeral=True)
-
     @nextcord.slash_command(
         name="remove_slowmode",
         description="Remove slowmode from a channel.",
@@ -100,12 +72,7 @@ class SlowmodeCog(commands.Cog):
             required=False
         )
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_channels:
@@ -122,12 +89,12 @@ class SlowmodeCog(commands.Cog):
                 description=f"Slowmode has been disabled in {target_channel.mention}.",
                 color=nextcord.Color.green()
             )
-            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.RYUJIN_LOGO)
+            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.logo)
 
             if interaction.guild.icon:
                 embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url)
             else:
-                embed.set_author(name="Ryujin", icon_url=self.RYUJIN_LOGO)
+                embed.set_author(name="Ryujin", icon_url=self.logo)
 
             await self.bot.maybe_send_ad(interaction)
             await interaction.send(embed=embed, ephemeral=True)

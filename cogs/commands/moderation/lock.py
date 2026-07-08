@@ -1,33 +1,11 @@
 import nextcord
 from nextcord.ext import commands
 from nextcord import SlashOption
+from cogs.utils.base import RyujinCog
 
-class LockCog(commands.Cog):
+class LockCog(RyujinCog):
     def __init__(self, bot):
         self.bot = bot
-        self.RYUJIN_LOGO = "https://cdn.discordapp.com/avatars/1059400568805785620/63a77f852ea29f37961f458c53fb5a97.png"
-
-    def check_blacklist(self, user_id):
-        if hasattr(self.bot, 'blacklist') and user_id in self.bot.blacklist:
-            return True, self.bot.blacklist[user_id]
-        return False, None
-
-    def create_blacklist_embed(self, reason):
-        embed = nextcord.Embed(
-            title="You are blacklisted!",
-            description=f"**You can't use Ryujin's commands anymore because you have been blacklisted for `{reason}`.**",
-            color=nextcord.Color.red()
-        )
-        embed.set_footer(
-            text="© Ryujin Bot (2023-2025) | Blacklist System",
-            icon_url=self.RYUJIN_LOGO
-        )
-        
-        embed.set_author(
-            name="Ryujin",
-            icon_url=self.RYUJIN_LOGO
-        )
-        return embed
 
     @nextcord.slash_command(
         name="lock",
@@ -43,12 +21,7 @@ class LockCog(commands.Cog):
             required=False
         )
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_channels:
@@ -69,19 +42,18 @@ class LockCog(commands.Cog):
                 description=f"{target_channel.mention} has been locked for `@everyone`.",
                 color=nextcord.Color.red()
             )
-            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.RYUJIN_LOGO)
+            embed.set_footer(text="© Ryujin Bot (2023-2025) | Moderation System", icon_url=self.logo)
 
             if guild.icon:
                 embed.set_author(name=guild.name, icon_url=guild.icon.url)
             else:
-                embed.set_author(name="Ryujin", icon_url=self.RYUJIN_LOGO)
+                embed.set_author(name="Ryujin", icon_url=self.logo)
 
             await self.bot.maybe_send_ad(interaction)
             await interaction.send(embed=embed, ephemeral=True)
 
         except Exception as e:
             await interaction.send(f"❌ Failed to lock the channel: `{e}`", ephemeral=True)
-
     @nextcord.slash_command(
         name="unlock",
         description="Unlocks a channel for @everyone.",
@@ -96,12 +68,7 @@ class LockCog(commands.Cog):
             required=False
         )
     ):
-        user_id = interaction.user.id
-        is_blacklisted, blacklist_reason = self.check_blacklist(user_id)
-        
-        if is_blacklisted:
-            embed = self.create_blacklist_embed(blacklist_reason)
-            await interaction.send(embed=embed, ephemeral=True)
+        if await self.blacklist_guard(interaction):
             return
 
         if not interaction.user.guild_permissions.manage_channels:
@@ -124,7 +91,7 @@ class LockCog(commands.Cog):
             )
             embed.set_footer(
                 text="© Ryujin Bot (2023-2025) | Moderation System", 
-                icon_url=self.RYUJIN_LOGO
+                icon_url=self.logo
             )
 
             if guild.icon:
@@ -135,7 +102,7 @@ class LockCog(commands.Cog):
             else:
                 embed.set_author(
                     name="Ryujin", 
-                    icon_url=self.RYUJIN_LOGO
+                    icon_url=self.logo
                 )
 
             await self.bot.maybe_send_ad(interaction)
