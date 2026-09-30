@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> ### 🚨 Repository Moved to GitLab
+> This repository has officially migrated to **GitLab** and is now archived on GitHub for historical reference.
+>
+> 📦 **Active Development & Releases**: [https://gitlab.com/aniscripts/ryujin](https://gitlab.com/aniscripts/ryujin)
+
 <div align="center">
   <a href="https://github.com/AniScripts">
     <img src="https://cdn.moongetsu.ro/GitHub/GithubHeader00.png" width="100%" alt="AniScripts"/>
